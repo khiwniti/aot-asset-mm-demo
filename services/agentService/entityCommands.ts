@@ -49,7 +49,7 @@ const STATUS_MAPS = {
   },
   task: {
     'todo': TaskStatus.TODO,
-    'todo': TaskStatus.TODO,
+    'to do': TaskStatus.TODO,
     'in progress': TaskStatus.IN_PROGRESS,
     'in_progress': TaskStatus.IN_PROGRESS,
     'blocked': TaskStatus.BLOCKED,
