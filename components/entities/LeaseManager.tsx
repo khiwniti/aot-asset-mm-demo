@@ -32,7 +32,6 @@ export const LeaseManager: React.FC<LeaseManagerProps> = ({
     selectLease,
     deselectLease,
     clearSelection,
-    changeLeaseStatus,
     fetchLeases,
     fetchExpiringLeases,
     createLease,
