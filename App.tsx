@@ -6,15 +6,10 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import PropertyListing from './pages/PropertyListing';
 import PropertyDetail from './pages/PropertyDetail';
-import Assets from './pages/Assets';
 import FinancialManagement from './pages/FinancialManagement';
-import Valuation from './pages/Valuation';
 import LeasingManagement from './pages/LeasingManagement';
 import Maintenance from './pages/Maintenance';
 import Reports from './pages/Reports';
-import CalendarView from './pages/CalendarView';
-import MapView from './pages/MapView';
-import Settings from './pages/Settings';
 import AskAOT from './pages/AskAOT';
 import { ChatProvider } from './context/ChatContext';
 import ChatWidget from './components/ChatWidget';
@@ -31,15 +26,10 @@ const App: React.FC = () => {
               <Route path="/" element={<Dashboard />} />
               <Route path="/properties" element={<PropertyListing />} />
               <Route path="/properties/:id" element={<PropertyDetail />} />
-              <Route path="/assets" element={<Assets />} />
               <Route path="/financial" element={<FinancialManagement />} />
-              <Route path="/valuation" element={<Valuation />} />
               <Route path="/leasing" element={<LeasingManagement />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/reports" element={<Reports />} />
-              <Route path="/calendar" element={<CalendarView />} />
-              <Route path="/map" element={<MapView />} />
-              <Route path="/settings" element={<Settings />} />
               <Route path="/ask-aot" element={<AskAOT />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

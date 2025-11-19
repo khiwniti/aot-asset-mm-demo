@@ -1,5 +1,4 @@
 
-
 export interface Property {
   id: string;
   name: string;
@@ -19,14 +18,14 @@ export interface KPI {
   label: string;
   value: string;
   trend: number;
-  trendLabel: string; // e.g. "since last month"
+  trendLabel: string;
   isPositive: boolean;
 }
 
 export interface ChartData {
   name: string;
   value: number;
-  value2?: number; // For comparison charts
+  value2?: number;
 }
 
 export interface Alert {
@@ -37,13 +36,22 @@ export interface Alert {
   date: string;
 }
 
-// Generative UI Types
-export type UIComponentType = 'chart' | 'approval' | 'alert_list' | 'property_card' | 'map' | 'kanban' | 'navigate';
+export type UIComponentType = 'chart' | 'approval' | 'alert_list' | 'property_card' | 'map' | 'kanban' | 'navigate' | 'report';
+
+export interface ReportData {
+  id: string;
+  title: string;
+  type: 'Financial' | 'Operational' | 'Market' | 'Compliance';
+  period: string;
+  summary: string;
+  keyMetrics: { label: string; value: string; trend?: 'up' | 'down' | 'neutral' }[];
+  generatedAt: string;
+}
 
 export interface UIPayload {
   type: UIComponentType;
-  data: any; // Flexible payload depending on type
-  status?: 'pending' | 'approved' | 'rejected'; // For HITL state
+  data: any; 
+  status?: 'pending' | 'approved' | 'rejected'; 
 }
 
 export interface Message {
@@ -51,21 +59,19 @@ export interface Message {
   role: 'user' | 'ai';
   content: string;
   timestamp: Date;
-  uiPayload?: UIPayload; // Optional structured data for Generative UI
+  uiPayload?: UIPayload;
 }
 
-// New Type for the Left Pane Visualizer
 export interface ActiveVisual {
   type: 'default' | 'chart' | 'map' | 'kanban';
   title: string;
   data: any;
 }
 
-// Visual Context for Insight Modal
 export interface VisualContext {
   type: 'chart' | 'map';
   title: string;
-  data: any; // ChartData[] or specific map data
+  data: any;
   chartType?: 'bar' | 'area' | 'pie';
 }
 
@@ -104,5 +110,4 @@ export interface InsightData {
   suggestions: string[];
 }
 
-// Voice API Types
 export type VoiceStatus = 'disconnected' | 'connecting' | 'connected' | 'error';

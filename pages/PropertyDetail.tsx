@@ -13,8 +13,6 @@ import {
   AlertTriangle, 
   DollarSign,
   Wrench,
-  FileText,
-  Calendar,
 } from 'lucide-react';
 
 const PropertyDetail: React.FC = () => {
@@ -27,11 +25,8 @@ const PropertyDetail: React.FC = () => {
   const tabs = [
     { id: 'overview', label: 'Overview' },
     { id: 'financial', label: 'Financial' },
-    { id: 'valuation', label: 'Valuation' },
     { id: 'leasing', label: 'Leasing' },
     { id: 'maintenance', label: 'Maintenance' },
-    { id: 'documents', label: 'Documents' },
-    { id: 'timeline', label: 'Timeline' },
   ];
 
   const OverviewContent = () => (
@@ -251,28 +246,10 @@ const PropertyDetail: React.FC = () => {
               <p>Financial Details placeholder - See Financial Management page for full charts</p>
            </div>
         )}
-        {activeTab === 'valuation' && (
-           <div className="bg-white p-10 rounded-xl text-center text-slate-400 border border-slate-200 border-dashed">
-              <TrendingUp className="mx-auto mb-2 opacity-50" size={32} />
-              <p>Valuation Analysis placeholder - Property valuation metrics and trends</p>
-           </div>
-        )}
         {activeTab === 'maintenance' && (
            <div className="bg-white p-10 rounded-xl text-center text-slate-400 border border-slate-200 border-dashed">
               <Wrench className="mx-auto mb-2 opacity-50" size={32} />
               <p>Maintenance history placeholder - See Maintenance page for full Kanban</p>
-           </div>
-        )}
-        {activeTab === 'documents' && (
-           <div className="bg-white p-10 rounded-xl text-center text-slate-400 border border-slate-200 border-dashed">
-              <FileText className="mx-auto mb-2 opacity-50" size={32} />
-              <p>Documents placeholder - Contracts, permits, and property files</p>
-           </div>
-        )}
-        {activeTab === 'timeline' && (
-           <div className="bg-white p-10 rounded-xl text-center text-slate-400 border border-slate-200 border-dashed">
-              <Calendar className="mx-auto mb-2 opacity-50" size={32} />
-              <p>Timeline placeholder - Property history and activity log</p>
            </div>
         )}
       </main>

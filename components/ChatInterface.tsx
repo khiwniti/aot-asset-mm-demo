@@ -2,10 +2,11 @@
 import React, { useEffect, useRef } from 'react';
 import { 
   Send, Bot, User, ThumbsUp, ThumbsDown, 
-  CheckCircle, XCircle, AlertTriangle, MapPin, ArrowUpRight, Sparkles, Mic, MicOff, Activity
+  CheckCircle, XCircle, AlertTriangle, MapPin, ArrowUpRight, Sparkles, Mic, MicOff, Activity,
+  FileText, Download
 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
-import { UIPayload } from '../types';
+import { UIPayload, ReportData } from '../types';
 
 interface ChatInterfaceProps {
   isFullPage?: boolean;
@@ -15,7 +16,7 @@ interface ChatInterfaceProps {
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme = 'light' }) => {
   const { 
     messages, sendMessage, isLoading, handleApproval, setActiveVisual, openChatWithPrompt,
-    voiceStatus, toggleVoiceMode, voiceError, isWakeWordListening
+    voiceStatus, toggleVoiceMode, voiceError
   } = useChat();
   const [input, setInput] = React.useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -54,12 +55,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme
   const QuickActions = () => (
     <div className="grid grid-cols-2 gap-3 mt-6 animate-in fade-in slide-in-from-bottom-4">
       <button 
-        onClick={() => openChatWithPrompt("Show most engaged clients and recent interactions.")}
+        onClick={() => openChatWithPrompt("Generate a monthly performance report.")}
         className="bg-[#1e293b] hover:bg-[#334155] p-4 rounded-xl border border-slate-700 text-left group transition-all"
       >
         <div className="flex justify-between items-start mb-2">
-          <span className="text-blue-400 font-bold text-xs">Show most engaged clients</span>
-          <Bot size={16} className="text-blue-400 opacity-50 group-hover:opacity-100" />
+          <span className="text-blue-400 font-bold text-xs">Generate Monthly Report</span>
+          <FileText size={16} className="text-blue-400 opacity-50 group-hover:opacity-100" />
         </div>
         <div className="h-1 w-8 bg-blue-500/30 rounded-full"></div>
       </button>
@@ -172,6 +173,43 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme
     </div>
   );
 
+  const GenUIReport = ({ data }: { data: ReportData }) => (
+     <div className={`${isDark ? 'bg-[#1e293b] border-slate-700' : 'bg-white border-slate-200'} rounded-xl border p-4 mt-2 shadow-sm w-full`}>
+        <div className="flex items-start gap-3 mb-3">
+           <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+              <FileText size={16} />
+           </div>
+           <div>
+              <h4 className={`font-bold text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>{data.title}</h4>
+              <p className="text-xs text-slate-500">{data.type} Report • {data.period}</p>
+           </div>
+        </div>
+        
+        <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'} mb-3 leading-relaxed`}>
+           {data.summary}
+        </p>
+
+        <div className="grid grid-cols-3 gap-2 mb-4">
+           {data.keyMetrics.map((metric, i) => (
+              <div key={i} className={`p-2 rounded-lg ${isDark ? 'bg-slate-800' : 'bg-slate-50'}`}>
+                 <div className="text-[10px] text-slate-500 truncate">{metric.label}</div>
+                 <div className={`font-bold text-sm ${
+                    metric.trend === 'up' ? 'text-green-500' : 
+                    metric.trend === 'down' ? 'text-red-500' : 
+                    isDark ? 'text-slate-200' : 'text-slate-800'
+                 }`}>
+                    {metric.value}
+                 </div>
+              </div>
+           ))}
+        </div>
+
+        <button className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-colors">
+           <Download size={14} /> Download PDF
+        </button>
+     </div>
+  );
+
   // --- Voice Mode Overlay ---
   if (voiceStatus !== 'disconnected') {
     return (
@@ -223,20 +261,8 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme
 
   return (
     <div className="flex flex-col h-full">
-      {/* Wake Word Indicator */}
-      {voiceStatus === 'disconnected' && isWakeWordListening && (
-        <div className={`absolute top-16 left-1/2 -translate-x-1/2 z-30 px-3 py-1 rounded-full shadow-lg border flex items-center gap-2 text-xs font-medium animate-in slide-in-from-top-2
-            ${isDark ? 'bg-slate-800 border-slate-600 text-blue-400' : 'bg-white border-blue-100 text-blue-600'}`}>
-           <div className="relative flex h-2 w-2">
-             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-             <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-           </div>
-           Listening for "Hi AOT" / "สวัสดี AOT"
-        </div>
-      )}
-
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar relative">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {messages.length === 1 && isDark && <QuickActions />}
         
         {messages.map((msg) => (
@@ -252,7 +278,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme
             <div className={`flex flex-col max-w-[85%] ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed shadow-sm
                 ${msg.role === 'ai' 
-                  ? (isDark ? 'bg-[#1e293b] border border-slate-700 text-slate-200' : 'bg-white border border-slate-100 text-slate-700')
+                  ? (isDark ? 'bg-[#1e293b] border border-slate-700 text-slate-200' : 'bg-white border-slate-100 text-slate-700')
                   : 'bg-blue-600 text-white'
                 }`}>
                 {msg.content}
@@ -272,6 +298,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme
                     )}
                     {msg.uiPayload.type === 'approval' && <GenUIApproval payload={msg.uiPayload} msgId={msg.id} />}
                     {msg.uiPayload.type === 'alert_list' && <GenUIAlerts data={msg.uiPayload.data} />}
+                    {msg.uiPayload.type === 'report' && <GenUIReport data={msg.uiPayload.data} />}
                  </div>
               )}
             </div>
@@ -303,14 +330,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme
             {/* Voice Mode Toggle */}
             <button 
                onClick={toggleVoiceMode}
-               className={`p-3 rounded-full transition-all flex items-center justify-center shrink-0 relative
-                  ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-blue-400' : 'bg-slate-100 hover:bg-slate-200 text-blue-600'}
-                  ${isWakeWordListening ? 'ring-2 ring-blue-400 ring-opacity-50' : ''}
-               `}
+               className={`p-3 rounded-full transition-all flex items-center justify-center shrink-0
+                  ${isDark ? 'bg-slate-800 hover:bg-slate-700 text-blue-400' : 'bg-slate-100 hover:bg-slate-200 text-blue-600'}`}
                title="Start Voice Session"
             >
                <Mic size={18} />
-               {isWakeWordListening && <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></span>}
             </button>
 
             <div className="relative flex-1">

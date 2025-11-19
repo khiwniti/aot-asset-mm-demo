@@ -1,5 +1,5 @@
 
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
 import { Message, UIPayload, InsightData } from "../types";
 import { PROPERTIES, REVENUE_DATA, ALERTS, WORK_ORDERS } from "./mockData";
 
@@ -15,90 +15,147 @@ interface AIResponse {
   uiPayload?: UIPayload;
 }
 
-// --- Schemas ---
+// --- Tool Definitions (Agent Constitution: Tool-Based Architecture) ---
+
+export const APP_TOOLS = [
+  {
+    functionDeclarations: [
+      {
+        name: "navigate",
+        description: "Navigate to a specific page in the application.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            path: { type: "STRING", description: "The route path (e.g., /properties, /financial)" }
+          },
+          required: ["path"]
+        }
+      },
+      {
+        name: "render_chart",
+        description: "Display a chart to visualize data.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            chartType: { type: "STRING", enum: ["bar", "pie", "area"] },
+            series: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  name: { type: "STRING" },
+                  value: { type: "NUMBER" },
+                  value2: { type: "NUMBER" }
+                }
+              }
+            }
+          },
+          required: ["title", "chartType", "series"]
+        }
+      },
+      {
+        name: "show_alerts",
+        description: "Display a list of alerts or risks.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            items: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  title: { type: "STRING" },
+                  severity: { type: "STRING", enum: ["critical", "warning", "info"] },
+                  location: { type: "STRING" },
+                  description: { type: "STRING" }
+                }
+              }
+            }
+          },
+          required: ["items"]
+        }
+      },
+      {
+        name: "request_approval",
+        description: "Request user approval for a maintenance or financial action.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            property: { type: "STRING" },
+            cost: { type: "NUMBER" },
+            vendor: { type: "STRING" },
+            justification: { type: "STRING" }
+          },
+          required: ["title", "property", "cost", "vendor", "justification"]
+        }
+      },
+      {
+        name: "generate_report",
+        description: "Generate a structured report (Financial, Operational, Market) with key metrics.",
+        parameters: {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            type: { type: "STRING", enum: ["Financial", "Operational", "Market", "Compliance"] },
+            period: { type: "STRING", description: "e.g., November 2024, Q3 2024" },
+            summary: { type: "STRING", description: "A concise executive summary of the report." },
+            keyMetrics: {
+              type: "ARRAY",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  label: { type: "STRING" },
+                  value: { type: "STRING" },
+                  trend: { type: "STRING", enum: ["up", "down", "neutral"] }
+                }
+              }
+            }
+          },
+          required: ["title", "type", "period", "summary", "keyMetrics"]
+        }
+      }
+    ]
+  },
+  // Deep Research Integration
+  { googleSearch: {} }
+];
 
 const INSIGHT_SCHEMA = {
-  type: Type.OBJECT,
+  type: 'OBJECT',
   properties: {
-    title: { type: Type.STRING, description: "A concise, catchy title for the insight" },
+    title: { type: 'STRING', description: "A concise, catchy title for the insight" },
     explanation: { 
-      type: Type.ARRAY, 
-      items: { type: Type.STRING }, 
+      type: 'ARRAY', 
+      items: { type: 'STRING' }, 
       description: "2-3 bullet points explaining the data trend or issue" 
     },
-    prediction: { type: Type.STRING, description: "A forward-looking prediction based on the data" },
+    prediction: { type: 'STRING', description: "A forward-looking prediction based on the data" },
     suggestions: { 
-      type: Type.ARRAY, 
-      items: { type: Type.STRING }, 
+      type: 'ARRAY', 
+      items: { type: 'STRING' }, 
       description: "3 actionable suggestions for the user" 
     },
   },
   required: ['title', 'explanation', 'prediction', 'suggestions'],
 };
 
-const CHAT_RESPONSE_SCHEMA = {
-  type: Type.OBJECT,
-  properties: {
-    text: { type: Type.STRING },
-    uiPayload: {
-      type: Type.OBJECT,
-      properties: {
-        type: { type: Type.STRING, enum: ['chart', 'approval', 'alert_list', 'map', 'navigate', 'kanban'] },
-        data: { 
-          type: Type.OBJECT, 
-          description: "The data payload for the UI component. All fields are optional but should be used according to the type.",
-          properties: {
-            title: { type: Type.STRING, nullable: true },
-            path: { type: Type.STRING, nullable: true },
-            chartType: { type: Type.STRING, nullable: true },
-            series: { 
-                type: Type.ARRAY,
-                nullable: true,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        name: { type: Type.STRING },
-                        value: { type: Type.NUMBER },
-                        value2: { type: Type.NUMBER, nullable: true }
-                    }
-                }
-            },
-            property: { type: Type.STRING, nullable: true },
-            cost: { type: Type.NUMBER, nullable: true },
-            vendor: { type: Type.STRING, nullable: true },
-            justification: { type: Type.STRING, nullable: true },
-            items: {
-                type: Type.ARRAY,
-                nullable: true,
-                items: {
-                    type: Type.OBJECT,
-                    properties: {
-                        title: { type: Type.STRING },
-                        severity: { type: Type.STRING },
-                        location: { type: Type.STRING },
-                        description: { type: Type.STRING }
-                    }
-                }
-            },
-            district: { type: Type.STRING, nullable: true }
-          }
-        },
-        status: { type: Type.STRING, enum: ['pending', 'approved', 'rejected'], nullable: true }
-      },
-      nullable: true
-    }
-  },
-  required: ['text']
-};
-
 // --- Context Helpers ---
 
 const getSystemContext = (path: string): string => {
-  const baseContext = `You are AOT Assistant, an expert Real Estate Asset Management AI.
-  You have access to a real estate portfolio with ${PROPERTIES.length} properties.
-  Your goal is to help the Asset Manager optimize revenue, reduce risk, and manage operations.
+  const baseContext = `You are AOT Assistant, an expert Real Estate Asset Management Agent.
+  You help the Asset Manager optimize revenue, reduce risk, and manage operations.
   
   Current Page: ${path}
+  
+  System Capabilities:
+  - You can navigate the app using the 'navigate' tool.
+  - You can visualize data using 'render_chart'.
+  - You can show alerts using 'show_alerts'.
+  - You can request approvals using 'request_approval'.
+  - You can generate reports using 'generate_report'.
+  - You can perform deep research using Google Search.
   
   Routing Knowledge:
   - Dashboard: /
@@ -122,7 +179,6 @@ const getSystemContext = (path: string): string => {
   } else if (path.includes('properties')) {
     dataContext = `
       Properties: ${PROPERTIES.map(p => `${p.name} (${p.type}, ${p.status})`).join(', ')}.
-      Focus: Identifying vacancy risks and renovation opportunities.
     `;
   } else if (path.includes('financial')) {
     dataContext = `
@@ -130,24 +186,24 @@ const getSystemContext = (path: string): string => {
       - Total Revenue: $2.4M
       - Expenses: $980K
       - Net Income: $1.42M
-      - Top Expense: Maintenance ($400K due to HVAC repairs).
     `;
   } else if (path.includes('maintenance')) {
     dataContext = `
       Work Orders:
       - Open: 12
       - High Priority: ${WORK_ORDERS.filter(w => w.priority === 'High').map(w => w.title).join(', ')}.
-      - Pending Approval: Roof Leak Repair ($2,400).
+    `;
+  } else if (path.includes('reports')) {
+    dataContext = `
+      You are in the Reports center. You can help the user generate custom reports based on portfolio data.
     `;
   }
 
   return `${baseContext}\n${dataContext}\n
   RESPONSE GUIDELINES:
-  1. Be concise and professional.
-  2. If the user asks to navigate, return a 'navigate' uiPayload with the correct path.
-  3. If the user asks for a chart, return a 'chart' uiPayload with valid series data.
-  4. If the user asks about alerts or risks, return an 'alert_list' uiPayload.
-  5. Always output strictly in JSON format adhering to the schema.
+  1. Use tools whenever possible to provide a rich UI experience.
+  2. Be concise and professional.
+  3. If researching external market data, use Google Search.
   `;
 };
 
@@ -167,13 +223,11 @@ export const generateAIResponse = async (
     const currentPath = context?.path || '/';
     const systemInstruction = getSystemContext(currentPath);
 
-    // Format history for Gemini
     const contents = history.map(msg => ({
       role: msg.role === 'ai' ? 'model' : 'user',
       parts: [{ text: msg.content }]
     }));
 
-    // Add current user message
     contents.push({
       role: 'user',
       parts: [{ text: userMessage }]
@@ -184,57 +238,87 @@ export const generateAIResponse = async (
       contents: contents,
       config: {
         systemInstruction: systemInstruction,
-        responseMimeType: 'application/json',
-        responseSchema: CHAT_RESPONSE_SCHEMA,
+        tools: APP_TOOLS, // Agent Constitution: Tool-Based Architecture
         temperature: 0.7,
       }
     });
 
-    const text = response.text;
-    if (!text) throw new Error("Empty response from Gemini");
+    const candidate = response.candidates?.[0];
+    let text = candidate?.content?.parts?.map(p => p.text).join('') || "";
+    let uiPayload: UIPayload | undefined;
 
-    const parsed = JSON.parse(text);
-    
-    // Clean up or transform payload if necessary
-    if (parsed.uiPayload) {
-       // Fix for 'alert_list' if model returns { items: [...] } inside data
-       if (parsed.uiPayload.type === 'alert_list' && !Array.isArray(parsed.uiPayload.data) && parsed.uiPayload.data?.items) {
-         parsed.uiPayload.data = parsed.uiPayload.data.items;
-       }
+    // 1. Handle Grounding (Deep Research)
+    const groundingChunks = candidate?.groundingMetadata?.groundingChunks;
+    if (groundingChunks && groundingChunks.length > 0) {
+      const sources = groundingChunks
+        .map(c => c.web?.uri ? `[${c.web.title}](${c.web.uri})` : null)
+        .filter(Boolean);
+      
+      if (sources.length > 0) {
+        text += `\n\n**Sources:**\n${sources.join('\n')}`;
+      }
     }
 
-    return parsed;
+    // 2. Handle Tool Calls (Generative UI)
+    const functionCalls = candidate?.content?.parts?.filter(p => p.functionCall).map(p => p.functionCall);
+    
+    if (functionCalls && functionCalls.length > 0) {
+      const call = functionCalls[0]; // Handle primary tool call
+      if (call && call.name) {
+         // Map tools to UIPayload
+         if (call.name === 'navigate') {
+            uiPayload = { type: 'navigate', data: call.args };
+         } else if (call.name === 'render_chart') {
+            uiPayload = { type: 'chart', data: call.args };
+         } else if (call.name === 'show_alerts') {
+            uiPayload = { type: 'alert_list', data: call.args['items'] || [] };
+         } else if (call.name === 'request_approval') {
+            uiPayload = { type: 'approval', status: 'pending', data: call.args };
+         } else if (call.name === 'generate_report') {
+            uiPayload = { 
+              type: 'report', 
+              data: {
+                ...call.args,
+                id: `RPT-${Date.now().toString().slice(-6)}`,
+                generatedAt: new Date().toISOString()
+              }
+            };
+         }
+         
+         // Add a text fallback if model didn't generate text
+         if (!text) {
+             text = `I've generated the ${call.name.replace(/_/g, ' ')} you requested.`;
+         }
+      }
+    }
+
+    if (!text && !uiPayload) throw new Error("Empty response from Gemini");
+
+    return { text, uiPayload };
 
   } catch (error) {
     console.error("Gemini Chat Error:", error);
-    // Fallback to mock on error
     return simulateStructuredResponse(userMessage, context);
   }
 };
 
 export const generateInsight = async (prompt: string): Promise<InsightData> => {
-   // Fallback if no API key
    if (!ai || !apiKey) {
      return simulateInsightResponse(prompt);
    }
 
    try {
      const response = await ai.models.generateContent({
-       model: 'gemini-3-pro-preview', // Thinking model
+       model: 'gemini-3-pro-preview',
        contents: [{
          role: 'user',
          parts: [{ text: `Analyze the following request and provide a strategic insight: "${prompt}". 
-         Context: Use general real estate asset management principles and assume a mixed portfolio of Commercial and Residential properties in Bangkok/Southeast Asia.
-         Data Reference (if relevant to prompt):
-         - Revenue: Growing, $2.4M/mo
-         - Occupancy: 76%
-         - Maintenance Issues: HVAC, Roof Leaks common
+         Context: Use general real estate asset management principles and assume a mixed portfolio.
          ` }]
        }],
        config: {
          responseMimeType: 'application/json',
          responseSchema: INSIGHT_SCHEMA,
-         // Thinking Config for Gemini 2.5/3.0 Pro models
          thinkingConfig: { thinkingBudget: 32768 }
        }
      });
@@ -252,139 +336,81 @@ export const generateInsight = async (prompt: string): Promise<InsightData> => {
 
 // --- Fallback Mocks ---
 
-// Mapping of natural language pages to routes
 const PAGE_ROUTES: Record<string, string> = {
   'dashboard': '/',
-  'home': '/',
-  'main': '/',
   'portfolio': '/properties',
-  'properties': '/properties',
-  'listing': '/properties',
-  'list': '/properties',
   'financial': '/financial',
-  'finance': '/financial',
-  'money': '/financial',
   'leasing': '/leasing',
-  'lease': '/leasing',
-  'tenants': '/leasing',
   'maintenance': '/maintenance',
-  'repairs': '/maintenance',
-  'work orders': '/maintenance',
   'reports': '/reports',
-  'compliance': '/reports',
-  'analytics': '/reports',
-  'settings': '/settings',
-  'ask aot': '/ask-aot',
-  'ai': '/ask-aot'
 };
 
 const simulateStructuredResponse = async (message: string, context?: { path: string }): Promise<AIResponse> => {
-  await new Promise(resolve => setTimeout(resolve, 800)); // Fake latency
+  await new Promise(resolve => setTimeout(resolve, 800)); 
 
   const lowerMsg = message.toLowerCase();
-  const currentPath = context?.path || '/';
-
-  // --- 1. Navigation Handling ---
-  const navIntent = Object.keys(PAGE_ROUTES).find(page => 
-    lowerMsg.includes(`go to ${page}`) || 
-    lowerMsg.includes(`navigate to ${page}`) || 
-    lowerMsg.includes(`show ${page}`) ||
-    lowerMsg.includes(`open ${page}`)
-  );
-
-  if (navIntent) {
-    const route = PAGE_ROUTES[navIntent];
-    if (route === currentPath) {
-      return { text: `You are already on the ${navIntent} page.` };
-    }
+  
+  // Report generation mock
+  if (lowerMsg.includes('report')) {
     return {
-      text: `Navigating to ${navIntent}...`,
+      text: "I've generated the monthly performance report for you.",
       uiPayload: {
-        type: 'navigate',
-        data: { path: route }
+        type: 'report',
+        data: {
+          id: 'RPT-MOCK-001',
+          title: 'Portfolio Performance Report',
+          type: 'Financial',
+          period: 'November 2024',
+          summary: 'Overall portfolio performance remains strong with a 5.2% increase in revenue. Occupancy rates have stabilized at 76%, though maintenance costs saw a slight uptick.',
+          keyMetrics: [
+            { label: 'Revenue', value: '$2.4M', trend: 'up' },
+            { label: 'NOI', value: '$1.42M', trend: 'up' },
+            { label: 'Expenses', value: '$980K', trend: 'down' }
+          ],
+          generatedAt: new Date().toISOString()
+        }
       }
     };
   }
 
-  // --- 2. Generative UI Scenarios ---
-  
+  // Navigation
+  const navIntent = Object.keys(PAGE_ROUTES).find(page => lowerMsg.includes(page) && lowerMsg.includes('go to'));
+  if (navIntent) {
+    return {
+      text: `Navigating to ${navIntent}...`,
+      uiPayload: { type: 'navigate', data: { path: PAGE_ROUTES[navIntent] } }
+    };
+  }
+
   // Chart
   if (lowerMsg.includes('revenue') || lowerMsg.includes('trend')) {
     return {
-      text: "Projected revenue growth for Q1-Q2 shows a positive trend. The jump in June corresponds to the new mall opening near Suvarnabhumi.",
+      text: "Here is the projected revenue growth.",
       uiPayload: {
         type: 'chart',
         data: {
-          title: "Revenue Projection (Q1-Q2)",
+          title: "Revenue Projection",
           chartType: "bar",
           series: [
             { name: "Jan", value: 330000, value2: 310000 },
             { name: "Feb", value: 345000, value2: 315000 },
-            { name: "Mar", value: 360000, value2: 320000 },
-            { name: "Apr", value: 385000, value2: 325000 },
-            { name: "May", value: 410000, value2: 330000 },
-            { name: "Jun", value: 450000, value2: 335000 },
           ]
         }
       }
     };
   }
-  
-  // Approval
-  if (lowerMsg.includes('fix') || lowerMsg.includes('repair') || lowerMsg.includes('maintenance') || lowerMsg.includes('roof')) {
-    return {
-      text: "I've found a pending high-priority maintenance request for the Roof Leak. It requires immediate approval.",
-      uiPayload: {
-        type: 'approval',
-        status: 'pending',
-        data: {
-          title: "Emergency HVAC Repair",
-          property: "Harbor Plaza - East Wing",
-          cost: 2400,
-          vendor: "ABC Cooling Systems",
-          justification: "Tenant reported unit failure. Requires compressor replacement."
-        }
-      }
-    };
-  }
 
-  // Default
   return {
-    text: "I'm operating in offline mode. I can help navigate or show basic mock data, but advanced AI analysis is currently unavailable."
+    text: "I'm operating in offline mode. Advanced AI analysis is currently unavailable."
   };
 };
 
 const simulateInsightResponse = async (prompt: string): Promise<InsightData> => {
    await new Promise(resolve => setTimeout(resolve, 1500));
-   const lowerPrompt = prompt.toLowerCase();
-
-   if (lowerPrompt.includes('revenue') || lowerPrompt.includes('trend')) {
-     return {
-       title: "Financial Snapshot Analysis",
-       explanation: [
-         "The Spend trend surges in late November and peaks in January before declining.",
-         "Conversion value mirrors this pattern, suggesting seasonal campaign effectiveness."
-       ],
-       prediction: "Efficiency is expected to normalize in Q2 as seasonal effects wane.",
-       suggestions: [
-         "Reallocate spend from low-performing months.",
-         "Investigate the February decline.",
-         "Optimize for the January peak next year."
-       ]
-     };
-   }
-   
    return {
      title: "General Data Insight",
-     explanation: [
-       "Data indicates a positive upward trend driven by occupancy.",
-       "Expenses remain within budget tolerances."
-     ],
-     prediction: "Steady growth projected for the next quarter.",
-     suggestions: [
-        "Conduct a utility audit.",
-        "Review vendor contracts.",
-        "Survey tenants for satisfaction."
-     ]
+     explanation: ["Data indicates a positive trend.", "Expenses are stable."],
+     prediction: "Growth projected for next quarter.",
+     suggestions: ["Review contracts.", "Check utility usage.", "Survey tenants."]
    };
 };

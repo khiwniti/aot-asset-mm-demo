@@ -10,11 +10,7 @@ import {
   Wrench,
   FileText,
   Users,
-  Sparkles,
-  Building2,
-  TrendingUp,
-  Calendar,
-  MapPin
+  Sparkles
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -55,14 +51,10 @@ const Sidebar: React.FC = () => {
       <nav className="flex-1 px-3 py-4">
         <NavItem to="/" icon={LayoutDashboard} label="Dashboard" />
         <NavItem to="/properties" icon={Home} label="Portfolio" />
-        <NavItem to="/assets" icon={Building2} label="Assets" />
         <NavItem to="/financial" icon={DollarSign} label="Financial" />
-        <NavItem to="/valuation" icon={TrendingUp} label="Valuation" />
         <NavItem to="/leasing" icon={Users} label="Leasing" />
         <NavItem to="/maintenance" icon={Wrench} label="Maintenance" />
         <NavItem to="/reports" icon={FileText} label="Reports" />
-        <NavItem to="/calendar" icon={Calendar} label="Calendar" />
-        <NavItem to="/map" icon={MapPin} label="Map View" />
         
         <div className="mt-6 mb-2 px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">
           AI Tools

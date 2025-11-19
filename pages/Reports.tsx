@@ -2,9 +2,12 @@
 import React from 'react';
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
-import { FileText, Download, Calendar, CheckCircle2, AlertCircle } from 'lucide-react';
+import { FileText, Download, Calendar, CheckCircle2, AlertCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { useChat } from '../context/ChatContext';
 
 const Reports: React.FC = () => {
+  const { generatedReports } = useChat();
+
   return (
     <div className="min-h-screen bg-[#f8f9fc]">
       <Header title="Reports & Compliance" subtitle="Generate insights and track regulatory compliance." />
@@ -25,6 +28,46 @@ const Reports: React.FC = () => {
              </div>
            ))}
         </div>
+
+        {/* AI Generated Reports Section (Shared State) */}
+        {generatedReports.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm animate-in fade-in slide-in-from-bottom-4">
+             <div className="flex items-center gap-3 mb-4">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white">
+                   <Sparkles size={16} />
+                </div>
+                <h3 className="font-bold text-slate-800">AI Generated Reports</h3>
+             </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {generatedReports.map((report, i) => (
+                   <div key={i} className="border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow bg-slate-50/50">
+                      <div className="flex justify-between items-start mb-2">
+                         <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase">{report.type}</span>
+                         <span className="text-xs text-slate-400">{new Date(report.generatedAt).toLocaleDateString()}</span>
+                      </div>
+                      <h4 className="font-bold text-slate-800 mb-1">{report.title}</h4>
+                      <p className="text-sm text-slate-500 mb-4 line-clamp-2">{report.summary}</p>
+                      
+                      {/* Mini Metrics */}
+                      <div className="grid grid-cols-3 gap-2 mb-4">
+                        {report.keyMetrics.slice(0, 3).map((m, idx) => (
+                           <div key={idx} className="bg-white p-2 rounded border border-slate-100">
+                              <div className="text-[10px] text-slate-400 truncate">{m.label}</div>
+                              <div className={`text-xs font-bold ${m.trend === 'up' ? 'text-green-600' : m.trend === 'down' ? 'text-red-600' : 'text-slate-700'}`}>
+                                 {m.value}
+                              </div>
+                           </div>
+                        ))}
+                      </div>
+
+                      <button className="w-full py-2 border border-slate-200 hover:bg-white rounded-lg text-xs font-medium text-slate-600 transition-colors flex items-center justify-center gap-2">
+                         <Download size={14} /> Download PDF
+                      </button>
+                   </div>
+                ))}
+             </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
            {/* Custom Report Builder */}
