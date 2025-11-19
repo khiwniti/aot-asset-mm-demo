@@ -10,6 +10,7 @@ import LeasingManagement from './pages/LeasingManagement';
 import Maintenance from './pages/Maintenance';
 import Reports from './pages/Reports';
 import AskAOT from './pages/AskAOT';
+import EntityManagementDemo from './pages/EntityManagementDemo';
 import { ChatProvider } from './context/ChatContext';
 import ChatWidget from './components/ChatWidget';
 import InsightModal from './components/InsightModal';
@@ -30,6 +31,7 @@ const App: React.FC = () => {
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/ask-aot" element={<AskAOT />} />
+              <Route path="/entity-management" element={<EntityManagementDemo />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
             
