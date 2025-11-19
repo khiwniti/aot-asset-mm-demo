@@ -34,8 +34,7 @@ export const LeaseManager: React.FC<LeaseManagerProps> = ({
     clearSelection,
     fetchLeases,
     fetchExpiringLeases,
-    createLease,
-    deleteLease
+    createLease
   } = useLeaseStore();
 
   const [showCreateForm, setShowCreateForm] = useState(false);
