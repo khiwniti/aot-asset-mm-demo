@@ -3,7 +3,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { Message, InsightData } from "../../types";
 import { AIResponse } from "./types";
-import { PROPERTIES, REVENUE_DATA, ALERTS, WORK_ORDERS } from "../mockData";
+import { PROPERTIES, ALERTS, WORK_ORDERS } from "../mockData";
 import { CHAT_RESPONSE_SCHEMA, INSIGHT_SCHEMA } from "./schemas";
 
 const apiKey = process.env.API_KEY;
