@@ -45,7 +45,6 @@ export const WorkflowStatusManager: React.FC<WorkflowManagerProps> = ({
     workflows,
     syncStatus,
     selectWorkflow,
-    deselectWorkflow,
     clearSelection,
     selectedWorkflows,
     changeWorkflowStatus,
