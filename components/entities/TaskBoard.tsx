@@ -44,7 +44,6 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
     tasks,
     syncStatus,
     selectTask,
-    deselectTask,
     clearSelection,
     selectedTasks,
     changeTaskStatus,
