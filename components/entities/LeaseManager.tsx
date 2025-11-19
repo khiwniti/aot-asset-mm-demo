@@ -5,7 +5,7 @@ import { Plus, AlertCircle, Loader, Calendar } from 'lucide-react';
 import { useLeaseStore } from '../../stores/entityStores';
 import { LeaseStatus, CreateLeaseRequest, Lease } from '../../types/entities';
 import { EntityCard } from './EntityCard';
-import { formatDistanceToNow, isBefore, addDays } from 'date-fns';
+import { formatDistanceToNow, isBefore } from 'date-fns';
 
 interface LeaseManagerProps {
   onLeaseCreate?: (lease: Lease) => void;
