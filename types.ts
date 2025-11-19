@@ -112,3 +112,6 @@ export interface InsightData {
 }
 
 export type VoiceStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
+
+// Re-export entity types
+export * from './entities';
