@@ -48,11 +48,12 @@ const CHAT_RESPONSE_SCHEMA = {
           type: Type.OBJECT, 
           description: "The data payload for the UI component. All fields are optional but should be used according to the type.",
           properties: {
-            title: { type: Type.STRING },
-            path: { type: Type.STRING },
-            chartType: { type: Type.STRING },
+            title: { type: Type.STRING, nullable: true },
+            path: { type: Type.STRING, nullable: true },
+            chartType: { type: Type.STRING, nullable: true },
             series: { 
                 type: Type.ARRAY,
+                nullable: true,
                 items: {
                     type: Type.OBJECT,
                     properties: {
@@ -62,12 +63,13 @@ const CHAT_RESPONSE_SCHEMA = {
                     }
                 }
             },
-            property: { type: Type.STRING },
-            cost: { type: Type.NUMBER },
-            vendor: { type: Type.STRING },
-            justification: { type: Type.STRING },
+            property: { type: Type.STRING, nullable: true },
+            cost: { type: Type.NUMBER, nullable: true },
+            vendor: { type: Type.STRING, nullable: true },
+            justification: { type: Type.STRING, nullable: true },
             items: {
                 type: Type.ARRAY,
+                nullable: true,
                 items: {
                     type: Type.OBJECT,
                     properties: {
@@ -78,11 +80,12 @@ const CHAT_RESPONSE_SCHEMA = {
                     }
                 }
             },
-            district: { type: Type.STRING }
+            district: { type: Type.STRING, nullable: true }
           }
         },
         status: { type: Type.STRING, enum: ['pending', 'approved', 'rejected'], nullable: true }
       },
+      nullable: true
     }
   },
   required: ['text']
