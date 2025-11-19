@@ -84,6 +84,7 @@ export interface Lease {
   endDate: string;
   rent: number;
   status: 'Active' | 'Expiring' | 'New';
+  renewalStatus?: 'None' | 'Draft' | 'Sent' | 'Negotiating' | 'Signed';
 }
 
 export interface WorkOrder {

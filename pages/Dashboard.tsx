@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
@@ -17,6 +18,12 @@ import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { KPIS, REVENUE_DATA, ALERTS, PROPERTY_TYPE_DISTRIBUTION, ACTIVITIES } from '../services/mockData';
 import { generateAIResponse } from '../services/geminiService';
+
+const Card = ({ children, className = '' }: { children?: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${className}`}>
+    {children}
+  </div>
+);
 
 const Dashboard: React.FC = () => {
   const [insights, setInsights] = React.useState({ portfolio: '', revenue: '' });
@@ -299,7 +306,7 @@ const Dashboard: React.FC = () => {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
                   <h3 className="font-bold text-slate-800">Critical Alerts</h3>
-                  <AIAssistButton prompt="Analyze these alerts. Which one requires the most urgent attention and why?" />
+                  <AIAssistButton prompt="Show me all critical and warning alerts using the alert list view." />
               </div>
               <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
                 <AlertCircle size={18} />

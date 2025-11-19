@@ -172,11 +172,11 @@ export const ALERTS: Alert[] = [
 ];
 
 export const LEASES: Lease[] = [
-  { id: 'L001', propertyId: 'P001', propertyName: 'Suvarnabhumi - Unit 5F', tenant: 'TechCorp Inc.', startDate: '2023-01-15', endDate: '2025-12-15', rent: 8500, status: 'Expiring' },
-  { id: 'L002', propertyId: 'P003', propertyName: 'Park Villa - 204', tenant: 'Design Studio LLC', startDate: '2022-06-01', endDate: '2026-05-31', rent: 6200, status: 'Active' },
-  { id: 'L003', propertyId: 'P004', propertyName: 'Sriracha View - 8A', tenant: 'Medical Group', startDate: '2024-03-01', endDate: '2027-02-28', rent: 4800, status: 'Active' },
-  { id: 'L004', propertyId: 'P001', propertyName: 'Suvarnabhumi - Unit 3B', tenant: 'Global Logistics', startDate: '2023-11-01', endDate: '2024-11-01', rent: 7200, status: 'Expiring' },
-  { id: 'L005', propertyId: 'P005', propertyName: 'Urban Chiang Mai - 101', tenant: 'Coffee Co.', startDate: '2024-01-01', endDate: '2028-12-31', rent: 12000, status: 'New' },
+  { id: 'L001', propertyId: 'P001', propertyName: 'Suvarnabhumi - Unit 5F', tenant: 'TechCorp Inc.', startDate: '2023-01-15', endDate: '2025-12-15', rent: 8500, status: 'Expiring', renewalStatus: 'None' },
+  { id: 'L002', propertyId: 'P003', propertyName: 'Park Villa - 204', tenant: 'Design Studio LLC', startDate: '2022-06-01', endDate: '2026-05-31', rent: 6200, status: 'Active', renewalStatus: 'None' },
+  { id: 'L003', propertyId: 'P004', propertyName: 'Sriracha View - 8A', tenant: 'Medical Group', startDate: '2024-03-01', endDate: '2027-02-28', rent: 4800, status: 'Active', renewalStatus: 'None' },
+  { id: 'L004', propertyId: 'P001', propertyName: 'Suvarnabhumi - Unit 3B', tenant: 'Global Logistics', startDate: '2023-11-01', endDate: '2024-11-01', rent: 7200, status: 'Expiring', renewalStatus: 'Draft' },
+  { id: 'L005', propertyId: 'P005', propertyName: 'Urban Chiang Mai - 101', tenant: 'Coffee Co.', startDate: '2024-01-01', endDate: '2028-12-31', rent: 12000, status: 'New', renewalStatus: 'Signed' },
 ];
 
 export const WORK_ORDERS: WorkOrder[] = [

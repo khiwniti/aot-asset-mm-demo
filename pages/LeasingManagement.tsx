@@ -1,16 +1,54 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { LEASES } from '../services/mockData';
-import { Clock, AlertCircle, UserPlus, CheckCircle2 } from 'lucide-react';
+import { Clock, AlertCircle, UserPlus, CheckCircle2, Send, FileCheck, ArrowRight } from 'lucide-react';
+import { Lease } from '../types';
 
 const LeasingManagement: React.FC = () => {
+  const [leases, setLeases] = useState<Lease[]>(LEASES);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  const handleSendNotice = (id: string) => {
+    // Simulate sending notice
+    setLeases(prev => prev.map(lease => {
+       if (lease.id === id) {
+          return { ...lease, renewalStatus: 'Sent' };
+       }
+       return lease;
+    }));
+    
+    const lease = leases.find(l => l.id === id);
+    setNotification(`Renewal notice sent to ${lease?.tenant}`);
+    
+    // Clear notification after 3 seconds
+    setTimeout(() => setNotification(null), 3000);
+  };
+
+  const getRenewalBadge = (status: string | undefined) => {
+     switch(status) {
+        case 'Sent': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100"><Send size={10} /> Notice Sent</span>;
+        case 'Draft': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">Drafted</span>;
+        case 'Negotiating': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">Negotiating</span>;
+        case 'Signed': return <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100"><FileCheck size={10} /> Signed</span>;
+        default: return <span className="text-xs text-slate-400">-</span>;
+     }
+  };
+
   return (
     <div className="min-h-screen bg-[#f8f9fc]">
       <Header title="Leasing Management" subtitle="Manage tenants, leases, vacancies and renewals." />
       
-      <main className="p-8 max-w-[1600px] mx-auto space-y-8">
+      <main className="p-8 max-w-[1600px] mx-auto space-y-8 relative">
+        {/* Notification Toast */}
+        {notification && (
+           <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-3 z-50 animate-in slide-in-from-bottom-4 fade-in">
+              <CheckCircle2 size={18} className="text-green-400" />
+              <span className="text-sm font-medium">{notification}</span>
+           </div>
+        )}
+
         {/* Metrics Row */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4 relative group">
@@ -87,28 +125,47 @@ const LeasingManagement: React.FC = () => {
                  </div>
                  <button className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700">+ New Lease</button>
               </div>
-              <table className="w-full text-left">
-                 <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
-                    <tr>
-                       <th className="p-4">Property</th>
-                       <th className="p-4">Tenant</th>
-                       <th className="p-4">End Date</th>
-                       <th className="p-4">Status</th>
-                    </tr>
-                 </thead>
-                 <tbody className="divide-y divide-slate-100">
-                    {LEASES.map(lease => (
-                       <tr key={lease.id} className="hover:bg-slate-50">
-                          <td className="p-4 text-sm font-medium text-slate-700">{lease.propertyName}</td>
-                          <td className="p-4 text-sm text-slate-600">{lease.tenant}</td>
-                          <td className="p-4 text-sm text-slate-600">{lease.endDate}</td>
-                          <td className="p-4">
-                             <div className={`w-2 h-2 rounded-full ${lease.status === 'Expiring' ? 'bg-red-500' : lease.status === 'Active' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-                          </td>
+              <div className="overflow-x-auto">
+                 <table className="w-full text-left">
+                    <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold">
+                       <tr>
+                          <th className="p-4">Property</th>
+                          <th className="p-4">Tenant</th>
+                          <th className="p-4">End Date</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4">Renewal</th>
+                          <th className="p-4 text-right">Actions</th>
                        </tr>
-                    ))}
-                 </tbody>
-              </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                       {leases.map(lease => (
+                          <tr key={lease.id} className="hover:bg-slate-50 transition-colors">
+                             <td className="p-4 text-sm font-medium text-slate-700">{lease.propertyName}</td>
+                             <td className="p-4 text-sm text-slate-600">{lease.tenant}</td>
+                             <td className="p-4 text-sm text-slate-600">{lease.endDate}</td>
+                             <td className="p-4">
+                                <div className={`w-2 h-2 rounded-full ${lease.status === 'Expiring' ? 'bg-red-500' : lease.status === 'Active' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
+                             </td>
+                             <td className="p-4">
+                                {getRenewalBadge(lease.renewalStatus)}
+                             </td>
+                             <td className="p-4 text-right">
+                                {lease.status === 'Expiring' && lease.renewalStatus !== 'Sent' && lease.renewalStatus !== 'Signed' ? (
+                                   <button 
+                                      onClick={() => handleSendNotice(lease.id)}
+                                      className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md hover:bg-blue-700 transition-colors inline-flex items-center gap-1"
+                                   >
+                                      Send Notice <ArrowRight size={12} />
+                                   </button>
+                                ) : (
+                                   <button className="text-xs text-slate-400 px-3 py-1.5">View Details</button>
+                                )}
+                             </td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
+              </div>
            </div>
 
            {/* Side Cards */}
