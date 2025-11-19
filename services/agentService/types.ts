@@ -1,7 +1,5 @@
 // Agent Service Types
 
-import { Message } from '../../types';
-
 export interface AIResponse {
   text: string;
   uiPayload?: UIPayload;
