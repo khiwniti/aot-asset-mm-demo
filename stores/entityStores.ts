@@ -33,7 +33,6 @@ import {
   leaseAPI,
   taskAPI,
   maintenanceAPI,
-  syncAPI,
 } from '../services/entityService';
 
 // ============ WORKFLOW STORE ============
