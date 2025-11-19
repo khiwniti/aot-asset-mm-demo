@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, PropsWithChildren, useRef, useEffect } from 'react';
 import { Message, ActiveVisual, InsightData, VisualContext, VoiceStatus } from '../types';
-import { generateAIResponse, generateInsight } from '../services/geminiService';
+import { generateAIResponse, generateInsight } from '../services/agentService';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { createPCM16Blob, decode, decodeAudioData } from '../services/audioUtils';
 import { useNavigate, useLocation } from 'react-router-dom';

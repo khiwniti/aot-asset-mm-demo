@@ -16,6 +16,7 @@ import CalendarView from './pages/CalendarView';
 import MapView from './pages/MapView';
 import Settings from './pages/Settings';
 import AskAOT from './pages/AskAOT';
+import EntityManagement from './pages/EntityManagement';
 import { ChatProvider } from './context/ChatContext';
 import ChatWidget from './components/ChatWidget';
 import InsightModal from './components/InsightModal';
@@ -40,6 +41,7 @@ const App: React.FC = () => {
               <Route path="/calendar" element={<CalendarView />} />
               <Route path="/map" element={<MapView />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/entity-management" element={<EntityManagement />} />
               <Route path="/ask-aot" element={<AskAOT />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

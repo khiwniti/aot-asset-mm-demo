@@ -1,4 +1,33 @@
-
+// Re-export entity types for convenience
+export { 
+  Workflow, 
+  Lease, 
+  Task, 
+  MaintenanceRequest,
+  WorkflowStatus,
+  LeaseStatus,
+  TaskStatus,
+  MaintenanceStatus,
+  Priority,
+  SyncStatus,
+  PendingOperation,
+  ConflictInfo,
+  AuditTrailEntry,
+  BulkOperationResult,
+  CreateWorkflowRequest,
+  UpdateWorkflowRequest,
+  CreateLeaseRequest,
+  UpdateLeaseRequest,
+  CreateTaskRequest,
+  UpdateTaskRequest,
+  CreateMaintenanceRequest,
+  UpdateMaintenanceRequest,
+  VALID_WORKFLOW_TRANSITIONS,
+  VALID_LEASE_TRANSITIONS,
+  VALID_TASK_TRANSITIONS,
+  VALID_MAINTENANCE_TRANSITIONS,
+  SyncEvent
+} from './types/entities';
 
 export interface Property {
   id: string;
