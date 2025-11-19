@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { Plus, AlertCircle, Loader, Calendar } from 'lucide-react';
 import { useLeaseStore } from '../../stores/entityStores';
 import { LeaseStatus, CreateLeaseRequest, Lease } from '../../types/entities';
-import { EntityCard } from './EntityCard';
 import { formatDistanceToNow, isBefore } from 'date-fns';
 
 interface LeaseManagerProps {
