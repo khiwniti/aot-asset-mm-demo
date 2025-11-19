@@ -1,7 +1,7 @@
 // Lease Manager Component - Manage leases with expiration tracking
 
 import React, { useEffect, useState } from 'react';
-import { Plus, AlertCircle, Loader, Calendar, TrendingDown } from 'lucide-react';
+import { Plus, AlertCircle, Loader, Calendar } from 'lucide-react';
 import { useLeaseStore } from '../../stores/entityStores';
 import { LeaseStatus, Priority, CreateLeaseRequest, Lease } from '../../types/entities';
 import { EntityCard } from './EntityCard';
