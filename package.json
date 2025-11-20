@@ -12,6 +12,8 @@
     "backend:start": "cd backend && npm start",
     "backend:migrate": "cd backend && npm run db:migrate",
     "backend:seed": "cd backend && npm run db:seed",
+    "backend:test": "cd backend && npm test",
+    "test:e2e": "tsx __tests__/e2e-test-script.ts",
     "dev:full": "concurrently \"npm run backend:dev\" \"npm run dev\"",
     "install:all": "npm install && cd backend && npm install && cd .."
   },

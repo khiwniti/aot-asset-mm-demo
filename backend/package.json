@@ -9,7 +9,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "db:migrate": "tsx src/database/migrate.ts",
-    "db:seed": "tsx src/database/seed.ts"
+    "db:seed": "tsx src/database/seed.ts",
+    "test": "tsx src/__tests__/manual-test.ts",
+    "test:api": "tsx src/__tests__/manual-test.ts"
   },
   "keywords": ["express", "typescript", "supabase", "realtime"],
   "author": "",
