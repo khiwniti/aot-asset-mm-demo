@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "name": "aot-backend",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "runtime": "nodejs20.x",
+  "env": {
+    "PORT": {
+      "value": "3001"
+    },
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "SUPABASE_URL": {
+      "value": "https://wvbyapxobvpiozdhyxjj.supabase.co"
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "description": "Supabase service role key"
+    },
+    "SUPABASE_KEY": {
+      "value": "sb_publishable_7tX3ttUeWOk2jANWdC08dg_H7yxt9h5"
+    },
+    "CORS_ORIGIN": {
+      "value": "https://aot-frontend.vercel.app"
+    },
+    "GOOGLE_API_KEY": {
+      "description": "Google API Key"
+    }
+  },
+  "functions": {
+    "src/server.ts": {
+      "memory": 1024,
+      "maxDuration": 60
+    }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  }
+}
