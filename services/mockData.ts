@@ -14,6 +14,8 @@ export const PROPERTIES: Property[] = [
     image: 'https://picsum.photos/400/300?random=1',
     tenantCount: 45,
     lastRenovated: '2022',
+    latitude: 13.6929,
+    longitude: 100.7501,
   },
   {
     id: 'P002',
@@ -28,6 +30,8 @@ export const PROPERTIES: Property[] = [
     image: 'https://picsum.photos/400/300?random=2',
     tenantCount: 22,
     lastRenovated: '2020',
+    latitude: 13.6950,
+    longitude: 100.7550,
   },
   {
     id: 'P003',
@@ -42,6 +46,8 @@ export const PROPERTIES: Property[] = [
     image: 'https://picsum.photos/400/300?random=3',
     tenantCount: 12,
     lastRenovated: '2023',
+    latitude: 8.0863,
+    longitude: 98.9853,
   },
   {
     id: 'P004',
@@ -56,6 +62,8 @@ export const PROPERTIES: Property[] = [
     image: 'https://picsum.photos/400/300?random=4',
     tenantCount: 8,
     lastRenovated: '2019',
+    latitude: 12.9299,
+    longitude: 100.9205,
   },
   {
     id: 'P005',
@@ -70,6 +78,8 @@ export const PROPERTIES: Property[] = [
     image: 'https://picsum.photos/400/300?random=5',
     tenantCount: 15,
     lastRenovated: '2024',
+    latitude: 18.7883,
+    longitude: 98.9853,
   },
   {
     id: 'P006',
@@ -84,6 +94,8 @@ export const PROPERTIES: Property[] = [
     image: 'https://picsum.photos/400/300?random=6',
     tenantCount: 30,
     lastRenovated: '2021',
+    latitude: 13.5951,
+    longitude: 100.7544,
   },
 ];
 
