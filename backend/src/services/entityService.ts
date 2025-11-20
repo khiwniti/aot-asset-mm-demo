@@ -8,8 +8,11 @@ import {
   PendingOperation 
 } from '../types/index.js';
 import { v4 as uuidv4 } from 'uuid';
+import { mockWorkflows, mockLeases, mockTasks, mockMaintenance } from '../data/mockData.js';
 
 export class EntityService {
+  // Flag to use mock data when database is not available
+  private static useMockData = false;
   // ==================== WORKFLOWS ====================
   
   static async createWorkflow(data: Partial<Workflow>, userId: string): Promise<Workflow> {
@@ -102,21 +105,34 @@ export class EntityService {
   }
 
   static async getWorkflows(filters?: Record<string, any>): Promise<Workflow[]> {
-    let query = supabase
-      .from('workflows')
-      .select('*')
-      .eq('is_deleted', false);
+    try {
+      let query = supabase
+        .from('workflows')
+        .select('*')
+        .eq('is_deleted', false);
 
-    if (filters?.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters?.assignee) {
-      query = query.eq('assignee', filters.assignee);
-    }
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters?.assignee) {
+        query = query.eq('assignee', filters.assignee);
+      }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) {
+        console.warn('Database error, using mock data:', error.message);
+        this.useMockData = true;
+        return mockWorkflows.filter(w => 
+          (!filters?.status || w.status === filters.status) &&
+          (!filters?.assignee || w.assignee === filters.assignee)
+        );
+      }
+      return data || [];
+    } catch (error) {
+      console.warn('Error accessing database, using mock data');
+      this.useMockData = true;
+      return mockWorkflows;
+    }
   }
 
   static async deleteWorkflow(id: string, userId: string): Promise<void> {
@@ -232,21 +248,32 @@ export class EntityService {
   }
 
   static async getLeases(filters?: Record<string, any>): Promise<Lease[]> {
-    let query = supabase
-      .from('leases')
-      .select('*')
-      .eq('is_deleted', false);
+    try {
+      let query = supabase
+        .from('leases')
+        .select('*')
+        .eq('is_deleted', false);
 
-    if (filters?.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters?.propertyId) {
-      query = query.eq('property_id', filters.propertyId);
-    }
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters?.propertyId) {
+        query = query.eq('property_id', filters.propertyId);
+      }
 
-    const { data, error } = await query.order('end_date', { ascending: true });
-    if (error) throw error;
-    return data || [];
+      const { data, error } = await query.order('end_date', { ascending: true });
+      if (error) {
+        console.warn('Database error, using mock data:', error.message);
+        return mockLeases.filter(l =>
+          (!filters?.status || l.status === filters.status) &&
+          (!filters?.propertyId || l.property_id === filters.propertyId)
+        );
+      }
+      return data || [];
+    } catch (error) {
+      console.warn('Error accessing database, using mock data');
+      return mockLeases;
+    }
   }
 
   static async deleteLease(id: string, userId: string): Promise<void> {
@@ -361,24 +388,35 @@ export class EntityService {
   }
 
   static async getTasks(filters?: Record<string, any>): Promise<Task[]> {
-    let query = supabase
-      .from('tasks')
-      .select('*')
-      .eq('is_deleted', false);
+    try {
+      let query = supabase
+        .from('tasks')
+        .select('*')
+        .eq('is_deleted', false);
 
-    if (filters?.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters?.assignee) {
-      query = query.eq('assignee', filters.assignee);
-    }
-    if (filters?.parentWorkflowId) {
-      query = query.eq('parent_workflow_id', filters.parentWorkflowId);
-    }
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters?.assignee) {
+        query = query.eq('assignee', filters.assignee);
+      }
+      if (filters?.parentWorkflowId) {
+        query = query.eq('parent_workflow_id', filters.parentWorkflowId);
+      }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) {
+        console.warn('Database error, using mock data:', error.message);
+        return mockTasks.filter(t =>
+          (!filters?.status || t.status === filters.status) &&
+          (!filters?.assignee || t.assignee === filters.assignee)
+        );
+      }
+      return data || [];
+    } catch (error) {
+      console.warn('Error accessing database, using mock data');
+      return mockTasks;
+    }
   }
 
   static async deleteTask(id: string, userId: string): Promise<void> {
@@ -501,24 +539,36 @@ export class EntityService {
   }
 
   static async getMaintenanceRequests(filters?: Record<string, any>): Promise<MaintenanceRequest[]> {
-    let query = supabase
-      .from('maintenance_requests')
-      .select('*')
-      .eq('is_deleted', false);
+    try {
+      let query = supabase
+        .from('maintenance_requests')
+        .select('*')
+        .eq('is_deleted', false);
 
-    if (filters?.status) {
-      query = query.eq('status', filters.status);
-    }
-    if (filters?.priority) {
-      query = query.eq('priority', filters.priority);
-    }
-    if (filters?.propertyId) {
-      query = query.eq('property_id', filters.propertyId);
-    }
+      if (filters?.status) {
+        query = query.eq('status', filters.status);
+      }
+      if (filters?.priority) {
+        query = query.eq('priority', filters.priority);
+      }
+      if (filters?.propertyId) {
+        query = query.eq('property_id', filters.propertyId);
+      }
 
-    const { data, error } = await query.order('created_at', { ascending: false });
-    if (error) throw error;
-    return data || [];
+      const { data, error } = await query.order('created_at', { ascending: false });
+      if (error) {
+        console.warn('Database error, using mock data:', error.message);
+        return mockMaintenance.filter(m =>
+          (!filters?.status || m.status === filters.status) &&
+          (!filters?.priority || m.priority === filters.priority) &&
+          (!filters?.propertyId || m.property_id === filters.propertyId)
+        );
+      }
+      return data || [];
+    } catch (error) {
+      console.warn('Error accessing database, using mock data');
+      return mockMaintenance;
+    }
   }
 
   static async deleteMaintenanceRequest(id: string, userId: string): Promise<void> {

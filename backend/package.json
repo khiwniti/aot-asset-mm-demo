@@ -30,6 +30,7 @@
     "@types/uuid": "^9.0.2",
     "@types/cors": "^2.8.13",
     "@types/ws": "^8.5.4",
+    "@vercel/node": "^3.0.0",
     "typescript": "~5.8.2",
     "tsx": "^3.14.0",
     "ts-node": "^10.9.1"

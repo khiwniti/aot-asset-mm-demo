@@ -1,25 +1,68 @@
 {
   "version": 2,
   "name": "aot-asset-management-backend",
-  "builds": [
-    {
-      "src": "src/server.ts",
-      "use": "@vercel/node"
+  "functions": {
+    "api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 10
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "src/server.ts"
+      "source": "/api/health",
+      "destination": "/api/health"
     },
     {
-      "src": "/(.*)",
-      "dest": "src/server.ts"
+      "source": "/api/workflows/:id/audit",
+      "destination": "/api/workflows?id=:id&audit=true"
+    },
+    {
+      "source": "/api/workflows/:id",
+      "destination": "/api/workflows?id=:id"
+    },
+    {
+      "source": "/api/workflows",
+      "destination": "/api/workflows"
+    },
+    {
+      "source": "/api/leases/:id/audit",
+      "destination": "/api/leases?id=:id&audit=true"
+    },
+    {
+      "source": "/api/leases/:id",
+      "destination": "/api/leases?id=:id"
+    },
+    {
+      "source": "/api/leases",
+      "destination": "/api/leases"
+    },
+    {
+      "source": "/api/tasks/:id/audit",
+      "destination": "/api/tasks?id=:id&audit=true"
+    },
+    {
+      "source": "/api/tasks/:id",
+      "destination": "/api/tasks?id=:id"
+    },
+    {
+      "source": "/api/tasks",
+      "destination": "/api/tasks"
+    },
+    {
+      "source": "/api/maintenance/:id/audit",
+      "destination": "/api/maintenance?id=:id&audit=true"
+    },
+    {
+      "source": "/api/maintenance/:id",
+      "destination": "/api/maintenance?id=:id"
+    },
+    {
+      "source": "/api/maintenance",
+      "destination": "/api/maintenance"
     }
   ],
   "env": {
     "NODE_ENV": "production",
-    "PORT": "3001",
     "SUPABASE_URL": "@supabase_url",
     "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
     "SUPABASE_KEY": "@supabase_key",

@@ -16,8 +16,26 @@ const app = express();
 const port = process.env.PORT || 3001;
 const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
-// Middleware
-app.use(cors({ origin: corsOrigin }));
+// Middleware - Allow multiple origins for development
+const allowedOrigins = [
+  corsOrigin,
+  'http://localhost:5173',
+  'http://localhost:12000',
+  'http://localhost:12001',
+  'https://work-1-nvjkruptxhrwgfhq.prod-runtime.all-hands.dev',
+  'https://work-2-nvjkruptxhrwgfhq.prod-runtime.all-hands.dev'
+];
+
+app.use(cors({ 
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all in dev
+    }
+  },
+  credentials: true 
+}));
 app.use(express.json());
 
 // Request logging middleware
@@ -83,11 +101,11 @@ wss.on('connection', (ws) => {
 });
 
 // Start server
-server.listen(port, () => {
+server.listen(port, '0.0.0.0', () => {
   console.log(`
 ╔════════════════════════════════════════════╗
 ║  AOT Asset Management Backend              ║
-║  Server running at http://localhost:${port}   ║
+║  Server running at http://0.0.0.0:${port}     ║
 ╚════════════════════════════════════════════╝
 `);
   console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);

@@ -16,7 +16,7 @@ import {
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { KPIS, REVENUE_DATA, ALERTS, PROPERTY_TYPE_DISTRIBUTION, ACTIVITIES } from '../services/mockData';
-import { generateAIResponse } from '../services/geminiService';
+import { generateAIResponse } from '../services/aiService';
 
 const Card = ({ children, className = '' }: { children?: any; className?: string }) => (
   <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${className}`}>
@@ -25,17 +25,28 @@ const Card = ({ children, className = '' }: { children?: any; className?: string
 );
 
 const Dashboard = () => {
-  const [insights, setInsights] = useState({ portfolio: '', revenue: '' });
+  const [insights, setInsights] = useState({ 
+    portfolio: 'Loading AI insights...', 
+    revenue: 'Loading AI insights...' 
+  });
 
   useEffect(() => {
     const fetchInsights = async () => {
-      const portfolioResp = await generateAIResponse("Generate dashboard portfolio insight", []);
-      const revenueResp = await generateAIResponse("Generate dashboard revenue insight", []);
-      
-      setInsights({
-        portfolio: portfolioResp.text,
-        revenue: revenueResp.text
-      });
+      try {
+        const portfolioResp = await generateAIResponse("Analyze this property portfolio: 6 properties, 89% occupancy, ฿4.8M total value. Provide a brief insight.", []);
+        const revenueResp = await generateAIResponse("Analyze this revenue: ฿350,000/month current, 12% growth vs last month. Provide a brief insight.", []);
+        
+        setInsights({
+          portfolio: portfolioResp.text,
+          revenue: revenueResp.text
+        });
+      } catch (error) {
+        console.error('Failed to load AI insights:', error);
+        setInsights({
+          portfolio: 'AI insights temporarily unavailable. Using GitHub Models for unlimited AI.',
+          revenue: 'Configure VITE_GITHUB_TOKEN in .env for AI insights.'
+        });
+      }
     };
     fetchInsights();
   }, []);
