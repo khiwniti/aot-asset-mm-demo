@@ -1,5 +1,4 @@
-
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import { 
@@ -11,13 +10,13 @@ import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { PROPERTIES, REVENUE_DATA, ALERTS, WORK_ORDERS, LEASES, ACTIVITIES, PROPERTY_TYPE_DISTRIBUTION } from '../services/mockData';
 
-const Card = ({ children, className = '' }: { children?: React.ReactNode; className?: string }) => (
+const Card = ({ children, className = '' }: { children?: any; className?: string }) => (
   <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${className}`}>
     {children}
   </div>
 );
 
-const OperationsAnalytics: React.FC = () => {
+const OperationsAnalytics = () => {
   // --- Metrics Calculation ---
   const metrics = useMemo(() => {
     const avgOccupancy = PROPERTIES.reduce((acc, p) => acc + p.occupancyRate, 0) / PROPERTIES.length;

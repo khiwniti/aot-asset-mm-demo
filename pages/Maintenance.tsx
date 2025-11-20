@@ -1,11 +1,9 @@
-
-import React from 'react';
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { WORK_ORDERS } from '../services/mockData';
 import { Plus, CheckSquare, Clock, AlertOctagon } from 'lucide-react';
 
-const Maintenance: React.FC = () => {
+const Maintenance = () => {
   const columns = ['Submitted', 'Approved', 'In Progress', 'Completed'];
 
   return (

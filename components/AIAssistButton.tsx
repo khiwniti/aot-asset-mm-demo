@@ -1,6 +1,3 @@
-
-
-import React from 'react';
 import { Sparkles } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 import { VisualContext } from '../types';
@@ -14,14 +11,14 @@ interface AIAssistButtonProps {
   visualData?: VisualContext;
 }
 
-const AIAssistButton: React.FC<AIAssistButtonProps> = ({ 
+const AIAssistButton = ({ 
   prompt, 
   tooltip = "Ask AI about this", 
   className = "",
   size = 16,
   mode = 'modal', // Defaulting to modal based on requirements
   visualData
-}) => {
+}: AIAssistButtonProps) => {
   const { openChatWithPrompt, triggerInsight } = useChat();
 
   return (

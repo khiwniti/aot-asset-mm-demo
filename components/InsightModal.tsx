@@ -1,11 +1,8 @@
-
-
-import React from 'react';
 import { useChat } from '../context/ChatContext';
 import { X, MessageCircle, Sparkles, Lightbulb, TrendingUp, MessageSquare } from 'lucide-react';
 import { ChartVisual, MapVisual } from './Visuals';
 
-const InsightModal: React.FC = () => {
+const InsightModal = () => {
   const { isInsightOpen, closeInsight, insightData, isInsightLoading, insightVisual, openChatWithPrompt } = useChat();
 
   if (!isInsightOpen) return null;

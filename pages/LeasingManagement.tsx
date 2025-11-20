@@ -1,12 +1,11 @@
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { LEASES } from '../services/mockData';
 import { Clock, AlertCircle, UserPlus, CheckCircle2, Send, FileCheck, ArrowRight } from 'lucide-react';
 import { Lease } from '../types';
 
-const LeasingManagement: React.FC = () => {
+const LeasingManagement = () => {
   const [leases, setLeases] = useState<Lease[]>(LEASES);
   const [notification, setNotification] = useState<string | null>(null);
 

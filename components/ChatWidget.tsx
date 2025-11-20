@@ -1,12 +1,11 @@
-
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Sparkles, Globe, Map as MapIcon, Maximize2, Minimize2 } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 import { useLocation } from 'react-router-dom';
 import ChatInterface from './ChatInterface';
 import { ChartVisual, MapVisual } from './Visuals';
 
-const ChatWidget: React.FC = () => {
+const ChatWidget = () => {
   const { isOpen, toggleChat, activeVisual } = useChat();
   const location = useLocation();
   const [isExpanded, setIsExpanded] = useState(false);

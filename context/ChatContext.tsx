@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState, PropsWithChildren, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, useRef, useEffect, PropsWithChildren } from 'react';
 import { Message, ActiveVisual, InsightData, VisualContext, VoiceStatus, ReportData } from '../types';
 import { generateAIResponse, generateInsight, APP_TOOLS } from '../services/geminiService';
 import { GoogleGenAI } from '@google/genai';
@@ -36,7 +35,8 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-export const ChatProvider: React.FC<PropsWithChildren<{}>> = ({ children }) => {
+// FIX: Use PropsWithChildren to correctly type the component and resolve the missing 'children' prop error.
+export const ChatProvider = ({ children }: PropsWithChildren) => {
   const navigate = useNavigate();
   const location = useLocation();
 

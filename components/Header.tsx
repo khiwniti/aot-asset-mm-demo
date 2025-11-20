@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bell, Search, ChevronDown, Globe } from 'lucide-react';
 
 interface HeaderProps {
@@ -6,7 +5,7 @@ interface HeaderProps {
   subtitle?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
+const Header = ({ title, subtitle }: HeaderProps) => {
   return (
     <header className="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between sticky top-0 z-20">
       <div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import { Map as MapIcon } from 'lucide-react';
@@ -8,7 +7,7 @@ interface VisualProps {
   theme?: 'light' | 'dark';
 }
 
-export const ChartVisual: React.FC<VisualProps> = ({ data, theme = 'dark' }) => {
+export const ChartVisual = ({ data, theme = 'dark' }: VisualProps) => {
   const isDark = theme === 'dark';
   
   // Common Colors (Power BI style palette)
@@ -200,7 +199,7 @@ export const ChartVisual: React.FC<VisualProps> = ({ data, theme = 'dark' }) => 
   );
 };
 
-export const MapVisual: React.FC<VisualProps> = ({ data, theme = 'dark' }) => {
+export const MapVisual = ({ data, theme = 'dark' }: VisualProps) => {
     const isDark = theme === 'dark';
     
     return (

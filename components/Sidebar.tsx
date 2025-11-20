@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -14,7 +12,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
 

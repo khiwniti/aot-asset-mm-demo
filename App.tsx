@@ -1,5 +1,3 @@
-
-import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
@@ -10,11 +8,12 @@ import LeasingManagement from './pages/LeasingManagement';
 import Maintenance from './pages/Maintenance';
 import Reports from './pages/Reports';
 import AskAOT from './pages/AskAOT';
+import OperationsAnalytics from './pages/OperationsAnalytics';
 import { ChatProvider } from './context/ChatContext';
 import ChatWidget from './components/ChatWidget';
 import InsightModal from './components/InsightModal';
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <HashRouter>
       <ChatProvider>
@@ -29,6 +28,7 @@ const App: React.FC = () => {
               <Route path="/leasing" element={<LeasingManagement />} />
               <Route path="/maintenance" element={<Maintenance />} />
               <Route path="/reports" element={<Reports />} />
+              <Route path="/operations" element={<OperationsAnalytics />} />
               <Route path="/ask-aot" element={<AskAOT />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>

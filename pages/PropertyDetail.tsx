@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { PROPERTIES, LEASES } from '../services/mockData';
 import Header from '../components/Header';
@@ -15,7 +14,7 @@ import {
   Wrench,
 } from 'lucide-react';
 
-const PropertyDetail: React.FC = () => {
+const PropertyDetail = () => {
   const { id } = useParams();
   const property = PROPERTIES.find(p => p.id === id) || PROPERTIES[0];
   const [activeTab, setActiveTab] = useState('overview');

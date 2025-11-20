@@ -1,10 +1,9 @@
-import React from 'react';
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import ReactECharts from 'echarts-for-react';
 import { ArrowUpRight, Download } from 'lucide-react';
 
-const FinancialManagement: React.FC = () => {
+const FinancialManagement = () => {
   // Mock data for simulations
   const EXPENSES_DATA = [
     { name: 'Maintenance', value: 35, color: '#3b82f6' },

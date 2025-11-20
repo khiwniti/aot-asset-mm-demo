@@ -1,5 +1,4 @@
-
-import React from 'react';
+import { useState, useEffect } from 'react';
 import ReactECharts from 'echarts-for-react';
 import * as echarts from 'echarts';
 import { 
@@ -19,16 +18,16 @@ import AIAssistButton from '../components/AIAssistButton';
 import { KPIS, REVENUE_DATA, ALERTS, PROPERTY_TYPE_DISTRIBUTION, ACTIVITIES } from '../services/mockData';
 import { generateAIResponse } from '../services/geminiService';
 
-const Card = ({ children, className = '' }: { children?: React.ReactNode; className?: string }) => (
+const Card = ({ children, className = '' }: { children?: any; className?: string }) => (
   <div className={`bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow ${className}`}>
     {children}
   </div>
 );
 
-const Dashboard: React.FC = () => {
-  const [insights, setInsights] = React.useState({ portfolio: '', revenue: '' });
+const Dashboard = () => {
+  const [insights, setInsights] = useState({ portfolio: '', revenue: '' });
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchInsights = async () => {
       const portfolioResp = await generateAIResponse("Generate dashboard portfolio insight", []);
       const revenueResp = await generateAIResponse("Generate dashboard revenue insight", []);

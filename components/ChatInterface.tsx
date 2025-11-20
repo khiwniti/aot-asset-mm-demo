@@ -1,5 +1,4 @@
-
-import React, { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Send, Bot, User, ThumbsUp, ThumbsDown, 
   CheckCircle, XCircle, AlertTriangle, MapPin, ArrowUpRight, Sparkles, Mic, MicOff, Activity,
@@ -13,12 +12,12 @@ interface ChatInterfaceProps {
   theme?: 'light' | 'dark';
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ isFullPage = false, theme = 'light' }) => {
+const ChatInterface = ({ isFullPage = false, theme = 'light' }: ChatInterfaceProps) => {
   const { 
     messages, sendMessage, isLoading, handleApproval, setActiveVisual, openChatWithPrompt,
     voiceStatus, toggleVoiceMode, voiceError
   } = useChat();
-  const [input, setInput] = React.useState('');
+  const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isDark = theme === 'dark';

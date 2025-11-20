@@ -1,11 +1,9 @@
-
-import React from 'react';
 import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { FileText, Download, Calendar, CheckCircle2, AlertCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { useChat } from '../context/ChatContext';
 
-const Reports: React.FC = () => {
+const Reports = () => {
   const { generatedReports } = useChat();
 
   return (
