@@ -77,14 +77,75 @@ export interface VisualContext {
 
 export interface Lease {
   id: string;
-  propertyId: string;
-  propertyName: string;
-  tenant: string;
-  startDate: string;
-  endDate: string;
-  rent: number;
-  status: 'Active' | 'Expiring' | 'New';
-  renewalStatus?: 'None' | 'Draft' | 'Sent' | 'Negotiating' | 'Signed';
+  property_id: string;
+  property_name: string;
+  tenant_id: string;
+  tenant_name: string;
+  start_date: string;
+  end_date: string;
+  rent_amount: number;
+  status: 'draft' | 'active' | 'expiring' | 'expired' | 'renewed';
+  renewal_terms?: string;
+  security_deposit: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  is_deleted: boolean;
+  version: number;
+}
+
+export interface Workflow {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
+  assignee: string;
+  due_date: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  property_id?: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  is_deleted: boolean;
+  version: number;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'todo' | 'in_progress' | 'blocked' | 'completed';
+  assignee: string;
+  due_date: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  parent_workflow_id?: string;
+  blocker_reason?: string;
+  estimated_hours?: number;
+  actual_hours?: number;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  is_deleted: boolean;
+  version: number;
+}
+
+export interface MaintenanceRequest {
+  id: string;
+  property_id: string;
+  description: string;
+  status: 'submitted' | 'assigned' | 'in_progress' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  assignee?: string;
+  vendor?: string;
+  cost_estimate: number;
+  actual_cost?: number;
+  scheduled_date?: string;
+  completion_date?: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  is_deleted: boolean;
+  version: number;
 }
 
 export interface WorkOrder {
