@@ -1,15 +1,13 @@
 /**
- * AI Service - Supports multiple AI providers
- * Providers: GitHub Models (free), Gemini (quota-limited)
+ * AI Service - GitHub Models Integration
+ * Using GitHub Models API for unlimited free AI capabilities
  */
 
 import { Message, UIPayload, InsightData } from "../types";
 import { PROPERTIES, REVENUE_DATA, ALERTS, WORK_ORDERS } from "./mockData";
 
-// Determine which AI provider to use
-const AI_PROVIDER = import.meta.env.VITE_AI_PROVIDER || 'github'; // 'github' or 'gemini'
+// GitHub Models configuration
 const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 interface AIResponse {
   text: string;
@@ -123,28 +121,9 @@ export const APP_TOOLS = [
   { googleSearch: {} }
 ];
 
-const INSIGHT_SCHEMA = {
-  type: 'OBJECT',
-  properties: {
-    title: { type: 'STRING', description: "A concise, catchy title for the insight" },
-    explanation: { 
-      type: 'ARRAY', 
-      items: { type: 'STRING' }, 
-      description: "2-3 bullet points explaining the data trend or issue" 
-    },
-    prediction: { type: 'STRING', description: "A forward-looking prediction based on the data" },
-    suggestions: { 
-      type: 'ARRAY', 
-      items: { type: 'STRING' }, 
-      description: "3 actionable suggestions for the user" 
-    },
-  },
-  required: ['title', 'explanation', 'prediction', 'suggestions'],
-};
-
 /**
  * GitHub Models API Integration
- * Uses GitHub's free AI models (GPT-4o, GPT-4o-mini, etc.)
+ * Uses GitHub's free AI models (GPT-4o-mini with unlimited tier)
  */
 async function generateWithGitHub(prompt: string, context: Message[]): Promise<AIResponse> {
   if (!GITHUB_TOKEN) {
@@ -199,69 +178,30 @@ Be concise, professional, and data-driven in your responses.`
 }
 
 /**
- * Gemini API Integration (fallback)
- */
-async function generateWithGemini(prompt: string, context: Message[]): Promise<AIResponse> {
-  if (!GEMINI_API_KEY) {
-    throw new Error('GEMINI_API_KEY not configured');
-  }
-
-  const { GoogleGenAI } = await import("@google/genai");
-  const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
-
-  const chat = ai.models.generateContent({
-    model: 'gemini-2.0-flash-exp',
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: prompt }]
-      }
-    ]
-  });
-
-  const result = await chat;
-  const text = result.response?.text() || 'No response generated.';
-
-  return { text };
-}
-
-/**
- * Main AI generation function
- * Automatically selects provider based on configuration
+ * Main AI generation function using GitHub Models
  */
 export async function generateAIResponse(
   prompt: string,
   context: Message[] = []
 ): Promise<AIResponse> {
+  if (!GITHUB_TOKEN) {
+    return {
+      text: 'GitHub Models is not configured. Please set VITE_GITHUB_TOKEN in your .env file.'
+    };
+  }
+
   try {
-    if (AI_PROVIDER === 'github' && GITHUB_TOKEN) {
-      console.log('🤖 Using GitHub Models API');
-      return await generateWithGitHub(prompt, context);
-    } else if (AI_PROVIDER === 'gemini' && GEMINI_API_KEY) {
-      console.log('🤖 Using Gemini API');
-      return await generateWithGemini(prompt, context);
-    } else if (GITHUB_TOKEN) {
-      // Fallback to GitHub if available
-      console.log('🤖 Falling back to GitHub Models API');
-      return await generateWithGitHub(prompt, context);
-    } else if (GEMINI_API_KEY) {
-      // Fallback to Gemini if available
-      console.log('🤖 Falling back to Gemini API');
-      return await generateWithGemini(prompt, context);
-    } else {
-      throw new Error('No AI provider configured. Please set VITE_GITHUB_TOKEN or VITE_GEMINI_API_KEY');
-    }
+    console.log('🤖 Using GitHub Models API (GPT-4o-mini)');
+    return await generateWithGitHub(prompt, context);
   } catch (error: any) {
-    console.error('Gemini Chat Error:', error);
+    console.error('GitHub Models API Error:', error);
     
     // Return helpful error message
     return {
       text: `I apologize, but I'm currently experiencing connection issues. ${
-        error.message?.includes('quota') 
-          ? 'The AI service quota has been exceeded. Please try again later or contact your administrator.' 
-          : error.message?.includes('GITHUB_TOKEN')
-          ? 'GitHub Models is not configured. Please set VITE_GITHUB_TOKEN in your .env file.'
-          : 'Please try again in a moment.'
+        error.message?.includes('GITHUB_TOKEN')
+          ? 'GitHub Models is not configured properly. Please check your VITE_GITHUB_TOKEN.'
+          : error.message || 'Please try again in a moment.'
       }`
     };
   }
@@ -269,38 +209,68 @@ export async function generateAIResponse(
 
 /**
  * Generate insights with structured schema for modal display
+ * Now using GitHub Models for unlimited free tier
  */
 export async function generateInsight(prompt: string): Promise<InsightData> {
-  // Only use Gemini for insights (it supports structured output)
-  if (!GEMINI_API_KEY) {
+  if (!GITHUB_TOKEN) {
+    console.warn('GitHub Token not configured, using simulated response');
     return simulateInsightResponse(prompt);
   }
 
   try {
-    const { GoogleGenAI } = await import("@google/genai");
-    const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
+    const systemPrompt = `You are an AI assistant specializing in real estate asset management. 
+Analyze data and provide strategic insights for property managers.
+Respond ONLY with valid JSON matching this exact structure (no markdown, no code blocks):
+{
+  "title": "A concise, catchy title for the insight",
+  "explanation": ["2-3 bullet points explaining the data trend or issue"],
+  "prediction": "A forward-looking prediction based on the data",
+  "suggestions": ["3 actionable suggestions for the user"]
+}`;
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash-exp',
-      contents: [{
-        role: 'user',
-        parts: [{ text: `Analyze the following request and provide a strategic insight: "${prompt}". 
-        Context: Use general real estate asset management principles and assume a mixed portfolio.
-        ` }]
-      }],
-      config: {
-        responseMimeType: 'application/json',
-        responseSchema: INSIGHT_SCHEMA,
-      }
+    const userPrompt = `Analyze the following request and provide a strategic insight: "${prompt}". 
+Context: Use general real estate asset management principles and assume a mixed portfolio.`;
+
+    const response = await fetch('https://models.inference.ai.azure.com/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GITHUB_TOKEN}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 1000,
+        response_format: { type: "json_object" }
+      })
     });
 
-    const text = response.text;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`GitHub Models API error: ${error.message || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const text = data.choices[0]?.message?.content;
+    
     if (!text) throw new Error("Empty insight response");
 
-    return JSON.parse(text);
+    // Parse and validate the JSON response
+    const insight = JSON.parse(text);
+    
+    // Validate required fields
+    if (!insight.title || !insight.explanation || !insight.prediction || !insight.suggestions) {
+      throw new Error("Invalid insight structure");
+    }
+
+    return insight as InsightData;
 
   } catch (error) {
-    console.error("Gemini Insight Error:", error);
+    console.error("GitHub Models Insight Error:", error);
     return simulateInsightResponse(prompt);
   }
 }
@@ -320,16 +290,12 @@ const simulateInsightResponse = async (prompt: string): Promise<InsightData> => 
  * Check if AI service is available
  */
 export function isAIAvailable(): boolean {
-  return !!(GITHUB_TOKEN || GEMINI_API_KEY);
+  return !!GITHUB_TOKEN;
 }
 
 /**
  * Get current AI provider
  */
 export function getAIProvider(): string {
-  if (AI_PROVIDER === 'github' && GITHUB_TOKEN) return 'GitHub Models';
-  if (AI_PROVIDER === 'gemini' && GEMINI_API_KEY) return 'Google Gemini';
-  if (GITHUB_TOKEN) return 'GitHub Models (fallback)';
-  if (GEMINI_API_KEY) return 'Google Gemini (fallback)';
-  return 'None';
+  return GITHUB_TOKEN ? 'GitHub Models (GPT-4o-mini)' : 'None';
 }
