@@ -178,8 +178,11 @@ Be concise, professional, and data-driven in your responses.`
     const text = data.choices[0]?.message?.content || 'No response generated.';
 
     return { text };
-  } catch (error) {
-    console.error('GitHub Models API Error:', error);
+  } catch (error: any) {
+    // Don't log 401 errors - they're expected and handled upstream
+    if (error.status !== 401) {
+      console.error('GitHub Models API Error:', error);
+    }
     throw error;
   }
 }
@@ -200,7 +203,7 @@ export async function generateAIResponse(
     console.log('🤖 Using GitHub Models API (GPT-4o-mini)');
     return await generateWithGitHub(prompt, context);
   } catch (error: any) {
-    // If authentication fails, use simulated response (don't log full error - it's expected)
+    // If authentication fails, use simulated response (silently)
     if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized')) {
       console.warn('⚠️ GitHub Models authentication failed, using simulated response');
       return simulateAIResponse(prompt);
