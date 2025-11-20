@@ -1,8 +1,6 @@
 import { createContext, useContext, useState, useRef, useEffect, PropsWithChildren } from 'react';
 import { Message, ActiveVisual, InsightData, VisualContext, VoiceStatus, ReportData } from '../types';
-import { generateAIResponse, generateInsight, APP_TOOLS } from '../services/geminiService';
-import { GoogleGenAI } from '@google/genai';
-import { createPCM16Blob, decode, decodeAudioData } from '../services/audioUtils';
+import { generateAIResponse, generateInsight } from '../services/githubModelService';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface ChatContextType {
@@ -84,15 +82,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
   // --- Voice API State ---
   const [voiceStatus, setVoiceStatus] = useState<VoiceStatus>('disconnected');
   const [voiceError, setVoiceError] = useState<string | null>(null);
-  
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const inputAudioContextRef = useRef<AudioContext | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
-  const nextStartTimeRef = useRef<number>(0);
-  const audioSourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  const currentSessionRef = useRef<any>(null);
+  const voiceStatusRef = useRef<VoiceStatus>('disconnected');
 
   const toggleChat = () => setIsOpen(prev => !prev);
 
@@ -185,190 +175,173 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
-  // --- Voice Logic (Live API) ---
+  // --- Voice Logic (Web Speech API) ---
+
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
 
   const stopVoiceSession = () => {
-    // Cleanup Input
-    if (processorRef.current) {
-        processorRef.current.disconnect();
-        processorRef.current.onaudioprocess = null;
-        processorRef.current = null;
-    }
-    if (sourceRef.current) {
-        sourceRef.current.disconnect();
-        sourceRef.current = null;
-    }
-    if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-        streamRef.current = null;
-    }
-    if (inputAudioContextRef.current) {
-        inputAudioContextRef.current.close();
-        inputAudioContextRef.current = null;
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (e) {}
+      recognitionRef.current = null;
     }
 
-    // Cleanup Output
-    audioSourcesRef.current.forEach(source => {
-        try { source.stop(); } catch (e) {}
-    });
-    audioSourcesRef.current.clear();
-    if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-    }
-
-    // Close Session
-    if (currentSessionRef.current) {
-        currentSessionRef.current = null;
+    if (synthRef.current) {
+      synthRef.current.cancel();
+      synthRef.current = null;
     }
 
     setVoiceStatus('disconnected');
-    nextStartTimeRef.current = 0;
+    voiceStatusRef.current = 'disconnected';
+  };
+
+  const speakText = (text: string) => {
+    if (!synthRef.current) return;
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    // Try to use a good voice if available
+    const voices = synthRef.current.getVoices();
+    const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Microsoft')) || voices[0];
+    if (preferredVoice) {
+      utterance.voice = preferredVoice;
+    }
+    
+    synthRef.current.speak(utterance);
   };
 
   const toggleVoiceMode = async () => {
     if (voiceStatus === 'connected' || voiceStatus === 'connecting') {
-        stopVoiceSession();
-        return;
+      stopVoiceSession();
+      return;
     }
 
     setVoiceStatus('connecting');
     setVoiceError(null);
 
     try {
-        const apiKey = process.env.API_KEY;
-        if (!apiKey) throw new Error("API_KEY is missing");
+      // Check browser support
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        throw new Error("Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.");
+      }
 
-        // 1. Setup Audio Contexts
-        const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-        const inputCtx = new AudioContextClass({ sampleRate: 16000 });
-        const outputCtx = new AudioContextClass({ sampleRate: 24000 });
-        
-        inputAudioContextRef.current = inputCtx;
-        audioContextRef.current = outputCtx;
+      if (!window.speechSynthesis) {
+        throw new Error("Speech synthesis not supported in this browser.");
+      }
 
-        // 2. Get Microphone Stream
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        streamRef.current = stream;
-
-        // 3. Connect to Gemini Live
-        const client = new GoogleGenAI({ apiKey });
-        const sessionPromise = client.live.connect({
-            model: 'gemini-2.5-flash-native-audio-preview-09-2025',
-            config: {
-                responseModalities: ['AUDIO'], 
-                speechConfig: {
-                    voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
-                },
-                systemInstruction: 'You are AOT Assistant. You are helpful and concise.',
-                tools: APP_TOOLS,
-            },
-            callbacks: {
-                onopen: () => {
-                    setVoiceStatus('connected');
-                    
-                    // Start Streaming Input
-                    const source = inputCtx.createMediaStreamSource(stream);
-                    const processor = inputCtx.createScriptProcessor(4096, 1, 1);
-                    
-                    processor.onaudioprocess = (e) => {
-                        const inputData = e.inputBuffer.getChannelData(0);
-                        const pcmBlob = createPCM16Blob(inputData);
-                        sessionPromise.then(session => {
-                            session.sendRealtimeInput({ media: pcmBlob });
-                        });
-                    };
-                    
-                    source.connect(processor);
-                    processor.connect(inputCtx.destination);
-                    
-                    sourceRef.current = source;
-                    processorRef.current = processor;
-
-                    // Trigger Welcome Message
-                    sessionPromise.then(session => {
-                        session.send({ parts: [{ text: "Say exactly 'Hello AOT, how can I help you?'" }], turnComplete: true });
-                    });
-                },
-                onmessage: async (msg: any) => {
-                    // Handle Audio Output
-                    const audioData = msg.serverContent?.modelTurn?.parts?.[0]?.inlineData?.data;
-                    if (audioData) {
-                        const ctx = audioContextRef.current;
-                        if (!ctx) return;
-
-                        // Resume audio context if it was suspended (browsers do this)
-                        if (ctx.state === 'suspended') {
-                            await ctx.resume();
-                        }
-
-                        nextStartTimeRef.current = Math.max(
-                            nextStartTimeRef.current,
-                            ctx.currentTime
-                        );
-
-                        const audioBuffer = await decodeAudioData(
-                            decode(audioData),
-                            ctx,
-                            24000
-                        );
-
-                        const source = ctx.createBufferSource();
-                        source.buffer = audioBuffer;
-                        source.connect(ctx.destination);
-                        
-                        source.onended = () => {
-                            audioSourcesRef.current.delete(source);
-                        };
-
-                        source.start(nextStartTimeRef.current);
-                        nextStartTimeRef.current += audioBuffer.duration;
-                        audioSourcesRef.current.add(source);
-                    }
-                    
-                    // Handle Tool Calls
-                    if (msg.toolCall) {
-                        // We can handle voice-triggered tool calls here in the future
-                        console.log("Voice Tool Call:", msg.toolCall);
-                        // For now, we just acknowledge it to the model
-                         sessionPromise.then(session => {
-                             session.sendToolResponse({
-                                 functionResponses: msg.toolCall.functionCalls.map((fc: any) => ({
-                                     id: fc.id,
-                                     name: fc.name,
-                                     response: { result: "Action executed." }
-                                 }))
-                             });
-                         });
-                    }
-
-                    // Handle Interruption
-                    if (msg.serverContent?.interrupted) {
-                        audioSourcesRef.current.forEach(source => {
-                            try { source.stop(); } catch(e) {}
-                        });
-                        audioSourcesRef.current.clear();
-                        nextStartTimeRef.current = 0;
-                    }
-                },
-                onclose: () => {
-                    setVoiceStatus('disconnected');
-                    stopVoiceSession();
-                },
-                onerror: (e) => {
-                    console.error("Voice Error", e);
-                    setVoiceError("Connection Error");
-                    stopVoiceSession();
-                }
-            }
+      // Initialize speech synthesis
+      synthRef.current = window.speechSynthesis;
+      
+      // Load voices (needed for some browsers)
+      if (synthRef.current.getVoices().length === 0) {
+        await new Promise<void>((resolve) => {
+          synthRef.current!.addEventListener('voiceschanged', () => resolve(), { once: true });
+          setTimeout(() => resolve(), 1000); // Timeout fallback
         });
+      }
 
-        currentSessionRef.current = await sessionPromise;
+      // Initialize speech recognition
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        setVoiceStatus('connected');
+        voiceStatusRef.current = 'connected';
+        speakText("Hello! I'm your AOT Assistant. How can I help you today?");
+      };
+
+      recognition.onresult = async (event: any) => {
+        const transcript = event.results[event.results.length - 1][0].transcript?.trim();
+        if (!transcript) return;
+
+        const userMsg: Message = {
+          id: Date.now().toString(),
+          role: 'user',
+          content: transcript,
+          timestamp: new Date()
+        };
+        setMessages(prev => [...prev, userMsg]);
+        setIsLoading(true);
+
+        try {
+          const response = await generateAIResponse(transcript, messages, { path: location.pathname });
+          const aiMsg: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'ai',
+            content: response.text,
+            uiPayload: response.uiPayload,
+            timestamp: new Date()
+          };
+
+          setMessages(prev => [...prev, aiMsg]);
+          speakText(response.text);
+
+          if (response.uiPayload) {
+            const { type, data } = response.uiPayload;
+
+            if (type === 'navigate' && data?.path) {
+              navigate(data.path);
+            } else if (type === 'chart' || type === 'map') {
+              setActiveVisual({
+                type: type,
+                title: data.title || 'Analysis',
+                data: data
+              });
+            } else if (type === 'report') {
+              setGeneratedReports(prev => [data, ...prev]);
+            }
+          }
+        } catch (error) {
+          console.error("Error processing voice input:", error);
+          speakText("I'm sorry, I encountered an error processing your request.");
+          setMessages(prev => [...prev, {
+            id: (Date.now() + 2).toString(),
+            role: 'ai',
+            content: "I'm sorry, I encountered an error processing your voice request.",
+            timestamp: new Date()
+          }]);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error:", event.error);
+        if (event.error === 'no-speech') {
+          // Ignore no-speech errors, just keep listening
+          return;
+        }
+        setVoiceError(`Speech recognition error: ${event.error}`);
+        stopVoiceSession();
+      };
+
+      recognition.onend = () => {
+        // Auto-restart if still in connected mode
+        if (voiceStatusRef.current === 'connected' && recognitionRef.current) {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.log('Recognition restart failed:', e);
+          }
+        }
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
 
     } catch (error: any) {
-        console.error("Failed to start voice session", error);
-        setVoiceError(error.message || "Could not connect");
-        stopVoiceSession();
+      console.error("Failed to start voice session", error);
+      setVoiceError(error.message || "Could not connect to voice services");
+      stopVoiceSession();
     }
   };
 

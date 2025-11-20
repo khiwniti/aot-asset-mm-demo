@@ -232,7 +232,7 @@ const ChatInterface = ({ isFullPage = false, theme = 'light' }: ChatInterfacePro
              )}
 
              <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                {voiceStatus === 'connecting' ? 'Connecting to Gemini...' : 'Listening...'}
+                {voiceStatus === 'connecting' ? 'Connecting to GitHub voice assistant...' : 'Listening...'}
              </h2>
              <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                 Speak naturally. I'm listening.
