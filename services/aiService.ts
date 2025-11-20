@@ -163,6 +163,13 @@ Be concise, professional, and data-driven in your responses.`
     });
 
     if (!response.ok) {
+      // Check for authentication error
+      if (response.status === 401) {
+        const authError: any = new Error('GitHub Models authentication failed (401 Unauthorized)');
+        authError.status = 401;
+        throw authError;
+      }
+      
       const error = await response.json();
       throw new Error(`GitHub Models API error: ${error.message || response.statusText}`);
     }
@@ -196,8 +203,8 @@ export async function generateAIResponse(
     console.error('GitHub Models API Error:', error);
     
     // If authentication fails, use simulated response
-    if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-      console.warn('GitHub Models authentication failed, using simulated response');
+    if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+      console.warn('⚠️ GitHub Models authentication failed, using simulated response');
       return simulateAIResponse(prompt);
     }
     
@@ -283,6 +290,13 @@ Context: Use general real estate asset management principles and assume a mixed 
     });
 
     if (!response.ok) {
+      // Check for authentication error
+      if (response.status === 401) {
+        const authError: any = new Error('GitHub Models authentication failed (401 Unauthorized)');
+        authError.status = 401;
+        throw authError;
+      }
+      
       const error = await response.json();
       throw new Error(`GitHub Models API error: ${error.message || response.statusText}`);
     }
@@ -302,10 +316,14 @@ Context: Use general real estate asset management principles and assume a mixed 
 
     return insight as InsightData;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("GitHub Models Insight Error:", error);
     // Fallback to simulated response on any error (including auth failures)
-    console.warn('Using simulated insight response');
+    if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+      console.warn('⚠️ GitHub Models authentication failed, using simulated insight response');
+    } else {
+      console.warn('⚠️ Using simulated insight response');
+    }
     return simulateInsightResponse(prompt);
   }
 }
