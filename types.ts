@@ -12,6 +12,8 @@ export interface Property {
   image: string;
   tenantCount: number;
   lastRenovated: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface KPI {

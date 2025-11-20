@@ -15,16 +15,8 @@ import Header from '../components/Header';
 import AIAssistButton from '../components/AIAssistButton';
 import { PROPERTIES } from '../services/mockData';
 import { Link } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import L from 'leaflet';
-
-// Fix for default marker icons in Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+import LeafletMap from '../components/LeafletMap';
+import { Property } from '../types';
 
 const PropertyListing = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid' | 'map'>('list');
@@ -109,24 +101,17 @@ const PropertyListing = () => {
     switch (viewMode) {
       case 'map':
         return (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[600px] animate-in fade-in z-0 relative">
-            <MapContainer center={[13.736717, 100.523186]} zoom={10} scrollWheelZoom={false} style={{ height: '100%', width: '100%', borderRadius: '0.75rem' }}>
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              {/* Use filtered properties for map markers */}
-              {filteredProperties.map((prop, idx) => (
-                <Marker key={prop.id} position={[13.736717 + (idx * 0.05 - 0.1), 100.523186 + (Math.random() - 0.5) * 0.2]}>
-                  <Popup>
-                    <div className="text-sm font-bold text-slate-800">{prop.name}</div>
-                    <div className="text-xs text-slate-500">{prop.address}</div>
-                    <div className="text-xs font-bold text-blue-600 mt-1">฿{prop.monthlyRent.toLocaleString()}/mo</div>
-                    <Link to={`/properties/${prop.id}`} className="text-[10px] text-blue-500 hover:underline block mt-1">View Details</Link>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-[600px] animate-in fade-in z-0 relative overflow-hidden">
+            <LeafletMap
+              properties={filteredProperties}
+              center={[13.736717, 100.523186]}
+              zoom={10}
+              height="100%"
+              showCluster={true}
+              onMarkerClick={(property: Property) => {
+                window.location.hash = `#/properties/${property.id}`;
+              }}
+            />
           </div>
         );
       case 'grid':
@@ -349,23 +334,30 @@ const PropertyListing = () => {
                 </div>
                 <div className="flex flex-col lg:flex-row gap-6">
                    {/* Map Visual (Left) */}
-                   <div className="lg:flex-1 bg-white rounded-xl h-[500px] border border-slate-200 relative overflow-hidden shadow-sm z-0">
-                      <MapContainer center={[13.6900, 100.7501]} zoom={14} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
-                        <TileLayer
-                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        />
-                        {regionProperties.map((prop) => (
-                          <Marker key={prop.id} position={[prop.lat, prop.lng]}>
-                            <Popup>
-                              <div className="text-sm font-bold text-slate-800">{prop.name}</div>
-                              <div className="text-xs text-slate-500">{prop.district}</div>
-                              <div className="text-xs font-bold text-blue-600 mt-1">฿{prop.price}/mo</div>
-                            </Popup>
-                          </Marker>
-                        ))}
-                      </MapContainer>
-                   </div>
+                      <div className="lg:flex-1 bg-white rounded-xl h-[500px] border border-slate-200 relative overflow-hidden shadow-sm z-0">
+                         <LeafletMap
+                           properties={regionProperties.map((prop) => ({
+                             id: `R${prop.id}`,
+                             name: prop.name,
+                             address: prop.district,
+                             city: 'Bangkok',
+                             type: 'Residential' as const,
+                             status: 'Active' as const,
+                             value: 5000000,
+                             occupancyRate: 85,
+                             monthlyRent: parseInt(prop.price.replace(/,/g, '')),
+                             image: 'https://picsum.photos/400/300?random=1',
+                             tenantCount: 10,
+                             lastRenovated: '2023',
+                             latitude: prop.lat,
+                             longitude: prop.lng,
+                           }) as Property)}
+                           center={[13.6900, 100.7501]}
+                           zoom={14}
+                           height="100%"
+                           showCluster={false}
+                         />
+                      </div>
 
                    {/* Property List (Right Sidebar) */}
                    <div className="w-full lg:w-[380px] shrink-0 flex flex-col">
