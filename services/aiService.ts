@@ -200,13 +200,14 @@ export async function generateAIResponse(
     console.log('🤖 Using GitHub Models API (GPT-4o-mini)');
     return await generateWithGitHub(prompt, context);
   } catch (error: any) {
-    console.error('GitHub Models API Error:', error);
-    
-    // If authentication fails, use simulated response
+    // If authentication fails, use simulated response (don't log full error - it's expected)
     if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized')) {
       console.warn('⚠️ GitHub Models authentication failed, using simulated response');
       return simulateAIResponse(prompt);
     }
+    
+    // Only log other unexpected errors
+    console.error('GitHub Models API Error:', error);
     
     // Return helpful error message for other errors
     return {
@@ -317,11 +318,11 @@ Context: Use general real estate asset management principles and assume a mixed 
     return insight as InsightData;
 
   } catch (error: any) {
-    console.error("GitHub Models Insight Error:", error);
     // Fallback to simulated response on any error (including auth failures)
     if (error.status === 401 || error.message?.includes('401') || error.message?.includes('Unauthorized')) {
       console.warn('⚠️ GitHub Models authentication failed, using simulated insight response');
     } else {
+      console.error("GitHub Models Insight Error:", error);
       console.warn('⚠️ Using simulated insight response');
     }
     return simulateInsightResponse(prompt);
