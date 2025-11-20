@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "projectSettings": {
+    "sourceFilesOutsideRootDirectory": true
+  },
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm run install:all -- --legacy-peer-deps",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "regions": ["sfo1"],
+  "env": {
+    "VITE_API_URL": {
+      "description": "Backend API URL for frontend",
+      "value": "https://aot-backend.vercel.app/api"
+    },
+    "VITE_WS_URL": {
+      "description": "WebSocket URL for real-time sync",
+      "value": "wss://aot-backend.vercel.app"
+    },
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini API Key for AI features"
+    },
+    "PORT": {
+      "value": "3001"
+    },
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "SUPABASE_URL": {
+      "value": "https://wvbyapxobvpiozdhyxjj.supabase.co"
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "description": "Supabase service role key for backend"
+    },
+    "SUPABASE_KEY": {
+      "value": "sb_publishable_7tX3ttUeWOk2jANWdC08dg_H7yxt9h5"
+    },
+    "CORS_ORIGIN": {
+      "value": "https://aot-frontend.vercel.app"
+    },
+    "GOOGLE_API_KEY": {
+      "description": "Google API Key for additional services"
+    }
+  },
+  "git": {
+    "deploymentEnabled": {
+      "main": false
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://aot-backend.vercel.app/api/$1"
+    }
+  ]
+}

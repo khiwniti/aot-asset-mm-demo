@@ -11,10 +11,16 @@ export default defineConfig(({ mode }) => {
       },
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'import.meta.env.VITE_API_URL': JSON.stringify(env.VITE_API_URL || 'http://localhost:3001/api'),
-        'import.meta.env.VITE_WS_URL': JSON.stringify(env.VITE_WS_URL || 'ws://localhost:3001'),
+        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+        'import.meta.env.VITE_API_URL': JSON.stringify(
+          env.VITE_API_URL || 
+          (mode === 'production' ? 'https://aot-backend.vercel.app/api' : 'http://localhost:3001/api')
+        ),
+        'import.meta.env.VITE_WS_URL': JSON.stringify(
+          env.VITE_WS_URL || 
+          (mode === 'production' ? 'wss://aot-backend.vercel.app' : 'ws://localhost:3001')
+        ),
       },
       resolve: {
         alias: {
