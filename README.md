@@ -45,7 +45,7 @@ npm run dev:full
 - 📋 **Workflow Management** - Customizable business workflows
 - ✅ **Task Management** - Team task assignment and tracking
 - 🔧 **Maintenance Requests** - Ticketing system for property maintenance
-- 🤖 **AI Chat Assistant** - Natural language interface with Gemini API
+- 🤖 **AI Chat Assistant** - Natural language interface with GitHub Models (GPT-4o)
 - 🗺️ **Interactive Maps** - Property visualization with markers and popups
 
 ### Technical Features
@@ -79,7 +79,7 @@ npm run dev:full
 - **UUID** - Unique identifiers
 
 ### AI & Integrations
-- **Google Gemini API** - AI chat assistant
+- **GitHub Models (GPT-4o)** - AI chat assistant & reporting
 - **Supabase** - Database and authentication
 - **OpenStreetMap** - Map tiles (light theme)
 - **CartoDB** - Map tiles (dark theme)
@@ -535,9 +535,10 @@ npm run install:all        # Install all dependencies
 - Full CRUD operations for all entities
 - Real-time WebSocket synchronization
 - Leaflet map integration
-- AI chat with Gemini
+- AI chat with GitHub Models (GPT-4o)
+- Voice mode with Web Speech API
 - Comprehensive test suite (45 tests)
-- Complete documentation (8 guides)
+- Complete documentation (9 guides)
 - Vercel deployment configuration
 
 ### In Progress 🚧
@@ -568,7 +569,7 @@ This project is part of AOT Asset Management System.
 - **React Team** - React 19
 - **Leaflet.js** - Interactive maps
 - **Supabase** - Database and backend
-- **Google** - Gemini AI API
+- **GitHub** - Models API platform
 - **Vercel** - Deployment platform
 - **OpenStreetMap** - Map tiles
 
