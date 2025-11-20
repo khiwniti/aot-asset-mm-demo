@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useRef, useEffect, PropsWithChildren } from 'react';
 import { Message, ActiveVisual, InsightData, VisualContext, VoiceStatus, ReportData } from '../types';
-import { generateAIResponse, generateInsight, APP_TOOLS } from '../services/geminiService';
+import { generateAIResponse, generateInsight, APP_TOOLS } from '../services/aiService';
 import { GoogleGenAI } from '@google/genai';
 import { createPCM16Blob, decode, decodeAudioData } from '../services/audioUtils';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -236,7 +236,7 @@ export const ChatProvider = ({ children }: PropsWithChildren) => {
     setVoiceError(null);
 
     try {
-        const apiKey = process.env.API_KEY;
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
         if (!apiKey) throw new Error("API_KEY is missing");
 
         // 1. Setup Audio Contexts

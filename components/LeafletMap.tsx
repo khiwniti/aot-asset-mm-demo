@@ -80,6 +80,7 @@ export const LeafletMap = ({
   return (
     <div className="w-full relative overflow-hidden rounded-lg" style={{ height }}>
       <MapContainer
+        key={`map-${center[0]}-${center[1]}-${zoom}`}
         ref={mapRef}
         center={center}
         zoom={zoom}

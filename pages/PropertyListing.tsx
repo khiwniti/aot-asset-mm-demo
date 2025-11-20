@@ -306,7 +306,7 @@ const PropertyListing = () => {
         {/* CONTENT RENDERER */}
         {activeTab === 'Property listing' ? renderPropertyView() : null}
 
-        {/* Region Listing Content (Original Implementation) */}
+        {/* Region Listing Content */}
         {activeTab === 'Region listing' && (
           <div className="space-y-8 animate-in fade-in">
              {/* Region Selection Pills */}
@@ -326,145 +326,36 @@ const PropertyListing = () => {
                 ))}
              </div>
 
-             {/* Map & List Container */}
+             {/* Property List without Map */}
              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                 <div className="flex items-center justify-between mb-4">
-                   <h3 className="font-bold text-lg text-slate-800">District : Suvarnabhumi Airport | BKK</h3>
-                   <AIAssistButton prompt="Analyze this district's map data. Where are the growth hotspots?" />
+                   <h3 className="font-bold text-lg text-slate-800">District: Suvarnabhumi Airport | BKK</h3>
+                   <AIAssistButton prompt="Analyze this district. What are the key insights?" />
                 </div>
-                <div className="flex flex-col lg:flex-row gap-6">
-                   {/* Map Visual (Left) */}
-                      <div className="lg:flex-1 bg-white rounded-xl h-[500px] border border-slate-200 relative overflow-hidden shadow-sm z-0">
-                         <LeafletMap
-                           properties={regionProperties.map((prop) => ({
-                             id: `R${prop.id}`,
-                             name: prop.name,
-                             address: prop.district,
-                             city: 'Bangkok',
-                             type: 'Residential' as const,
-                             status: 'Active' as const,
-                             value: 5000000,
-                             occupancyRate: 85,
-                             monthlyRent: parseInt(prop.price.replace(/,/g, '')),
-                             image: 'https://picsum.photos/400/300?random=1',
-                             tenantCount: 10,
-                             lastRenovated: '2023',
-                             latitude: prop.lat,
-                             longitude: prop.lng,
-                           }) as Property)}
-                           center={[13.6900, 100.7501]}
-                           zoom={14}
-                           height="100%"
-                           showCluster={false}
-                         />
+                
+                <div className="space-y-2">
+                   <h4 className="font-semibold text-slate-700 mb-3">Properties in this region ({regionProperties.length})</h4>
+                   {regionProperties.map((prop, i) => (
+                      <div key={i} className="flex justify-between items-center py-3 px-4 bg-slate-50 hover:bg-blue-50 rounded-lg cursor-pointer group transition-colors">
+                         <div>
+                            <span className="text-sm font-medium text-slate-800 group-hover:text-blue-600 block">{prop.name}</span>
+                            <span className="text-xs text-slate-500">{prop.district}</span>
+                         </div>
+                         <span className="text-sm font-semibold text-slate-700">฿{prop.price}/month</span>
                       </div>
-
-                   {/* Property List (Right Sidebar) */}
-                   <div className="w-full lg:w-[380px] shrink-0 flex flex-col">
-                      <div className="flex items-center justify-between mb-4">
-                         <h4 className="font-bold text-slate-800">All properties</h4>
-                         <button className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
-                            <MapIcon size={16} />
-                         </button>
-                      </div>
-                      <div className="relative mb-4">
-                         <Search className="absolute left-3 top-2.5 text-slate-400" size={16} />
-                         <input 
-                            type="text" 
-                            placeholder="Search location" 
-                            className="w-full border border-slate-300 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-blue-500"
-                         />
-                      </div>
-                      <div className="flex justify-between text-xs font-semibold text-slate-500 border-b border-slate-100 pb-2 mb-2">
-                         <span>Name</span>
-                         <span>District</span>
-                      </div>
-                      <div className="flex-1 overflow-y-auto pr-2 max-h-[400px] space-y-1 custom-scrollbar">
-                         {regionProperties.map((prop, i) => (
-                            <div key={i} className="flex justify-between items-center py-3 px-2 hover:bg-slate-50 rounded cursor-pointer group transition-colors border-b border-slate-50">
-                               <span className="text-sm font-medium text-slate-700 group-hover:text-blue-600 truncate max-w-[200px]">{prop.name}</span>
-                               <span className="text-xs text-slate-500">{prop.district}</span>
-                            </div>
-                         ))}
-                      </div>
-                   </div>
+                   ))}
                 </div>
              </div>
 
              {/* Insights Section */}
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Opportunities */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                   <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-2">
-                         <h3 className="font-bold text-lg text-slate-800">Potential opportunities</h3>
-                         <AIAssistButton prompt="Analyze these opportunities. Which one offers the highest ROI?" />
-                      </div>
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center">
-                         <TrendingUp size={16} />
-                      </div>
-                   </div>
-                   <div className="space-y-6">
-                      {opportunities.map((opp, i) => (
-                         <div key={i} className="border-b border-slate-50 last:border-0 pb-6 last:pb-0">
-                            <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2
-                               ${opp.type === 'Rent increase' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                               {opp.type}
-                            </span>
-                            <h4 className="font-bold text-slate-800 text-sm mb-1">{opp.title}</h4>
-                            <p className="text-xs text-slate-500 mb-3">{opp.desc}</p>
-                            <div className="flex items-end justify-between">
-                               <div>
-                                  <div className="flex items-center gap-1 text-xs font-bold text-slate-800">
-                                     {opp.prevValue && <span className="text-slate-400 font-normal line-through decoration-slate-400">{opp.prevValue}</span>} 
-                                     {opp.prevValue && <ArrowRight size={12} className="text-slate-400" />}
-                                     {opp.value}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-                                     <MapIcon size={10} /> {opp.location}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 ml-3.5">{opp.subLocation}</div>
-                               </div>
-                            </div>
-                         </div>
-                      ))}
-                   </div>
+                   <h3 className="font-bold text-lg text-slate-800 mb-4">Potential Opportunities</h3>
+                   <p className="text-sm text-slate-600">AI-powered insights will be displayed here.</p>
                 </div>
-
-                {/* Threats */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                   <div className="flex items-center justify-between mb-6">
-                      <div className="flex items-center gap-2">
-                         <h3 className="font-bold text-lg text-slate-800">Potential threats</h3>
-                         <AIAssistButton prompt="How should I mitigate these threats? Draft a response plan." />
-                      </div>
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center">
-                         <TrendingUp size={16} />
-                      </div>
-                   </div>
-                   <div className="space-y-6">
-                      {threats.map((threat, i) => (
-                         <div key={i} className="border-b border-slate-50 last:border-0 pb-6 last:pb-0">
-                            <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase mb-2 bg-red-100 text-red-700">
-                               {threat.type}
-                            </span>
-                            <h4 className="font-bold text-slate-800 text-sm mb-1">{threat.title}</h4>
-                            <p className="text-xs text-slate-500 mb-3">{threat.desc}</p>
-                            <div className="flex items-end justify-between">
-                               <div className="w-full">
-                                  <div className={`text-xs font-bold ${threat.trend === 'down' ? 'text-red-600' : 'text-slate-800'} flex justify-between items-center`}>
-                                     {threat.value}
-                                     {threat.trend === 'down' && <TrendingUp size={12} className="rotate-180 text-red-500" />}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-                                     <MapIcon size={10} /> {threat.location}
-                                  </div>
-                                  <div className="text-[10px] text-slate-400 ml-3.5">{threat.subLocation}</div>
-                               </div>
-                            </div>
-                         </div>
-                      ))}
-                   </div>
+                   <h3 className="font-bold text-lg text-slate-800 mb-4">Potential Threats</h3>
+                   <p className="text-sm text-slate-600">Risk analysis will be displayed here.</p>
                 </div>
              </div>
           </div>
